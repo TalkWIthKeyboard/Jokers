@@ -3,6 +3,7 @@ package com.example.Joker.domain;
 import com.mongodb.*;
 import org.bson.types.ObjectId;
 
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -97,6 +98,9 @@ public class UserDBService {
      */
     public String saveData(DBObject userdata) {
         try {
+            Date today = new Date();
+            userdata.put("createDate",today);
+            userdata.put("updateDate",today);
             this.user.save(userdata);
             return null;
         } catch (Exception ex) {
@@ -114,7 +118,9 @@ public class UserDBService {
      */
     public String updateInfo(String id, DBObject user) {
         try {
+            Date today = new Date();
             BasicDBObject basicObj = new BasicDBObject("_id", new ObjectId(id));
+            user.put("updateDate",today);
             this.user.update(basicObj, user, false, false);
             return null;
         } catch (Exception ex) {
