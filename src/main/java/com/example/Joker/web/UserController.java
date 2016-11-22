@@ -2,10 +2,11 @@ package com.example.Joker.web;
 
 import com.example.Joker.Config;
 import com.example.Joker.domain.User;
-import com.example.Joker.form.ChangePwdForm;
+import com.example.Joker.service.form.ChangePwdForm;
 import com.example.Joker.service.ErrorHandler;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
+import org.apache.catalina.servlet4preview.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.*;
 import com.example.Joker.domain.UserDBService;
 import com.example.Joker.service.Tool;
@@ -20,17 +21,25 @@ public class UserController {
     Tool tool = new Tool();
     Config config = new Config();
 
-    @RequestMapping("/")
-    public Map findById(
+
+    /**
+     * 获取用户的基本信息
+     *
+     * @param id
+     * @return
+     */
+    @RequestMapping("/userInfo")
+    public ErrorHandler getUserInfo(
             @RequestParam(value = "id", required = true) String id
     ) {
         UserDBService userdb = new UserDBService();
         DBObject user = userdb.findById(id);
         if (user != null) {
-            return user.toMap();
+            ErrorHandler success = config.getHandler("SUCCESS");
+            success.setParams(user);
+            return success;
         } else {
-            // TODO 错误码返回
-            return null;
+            return config.getHandler("INSIDE_ERROR");
         }
     }
 
@@ -54,9 +63,9 @@ public class UserController {
             if (pwdMd5.equals(userMap.get("password").toString())) {
                 user.put("password", tool.stringToMD5(changePwdForm.rePassword));
                 String error = userdb.updateInfo(id, user);
-                if (error == null){
+                if (error == null) {
                     return config.getHandler("SUCCESS");
-                } else{
+                } else {
                     return config.getHandler("DB_UPDATE_ERROR");
                 }
             } else {
@@ -85,7 +94,7 @@ public class UserController {
         user.put("username", UserForm.getUsername());
         user.put("sex", UserForm.getSex());
         String error = userdb.saveData(user);
-        if (error == null){
+        if (error == null) {
             return config.getHandler("SUCCESS");
         } else {
             return config.getHandler("DB_SAVE_ERROR");
@@ -102,14 +111,16 @@ public class UserController {
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public ErrorHandler login(
             @RequestParam(value = "account", required = true) String account,
-            @RequestParam(value = "password", required = true) String password
+            @RequestParam(value = "password", required = true) String password,
+            HttpServletRequest request
     ) {
-        // TODO 登录后的session操作
         UserDBService userdb = new UserDBService();
         DBObject user = userdb.findByAccount(account);
         if (user != null) {
             Map userMap = user.toMap();
             String pwdMd5 = tool.stringToMD5(password);
+            // 登录后存入session
+            request.getSession().setAttribute("user", user);
             if (pwdMd5.equals(userMap.get("password").toString())) {
                 return config.getHandler("SUCCESS");
             } else {
@@ -140,7 +151,7 @@ public class UserController {
             user.put("score", changeUserForm.getScore());
             user.put("sex", changeUserForm.getSex());
             String error = userdb.updateInfo(id, user);
-            if (error == null){
+            if (error == null) {
                 return config.getHandler("SUCCESS");
             } else {
                 return config.getHandler("DB_UPDATE_ERROR");

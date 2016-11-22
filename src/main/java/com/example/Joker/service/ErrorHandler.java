@@ -11,6 +11,7 @@ public class ErrorHandler{
 
     private Integer errorNum;
     private Map<String,String> errorValue;
+    private Object params;
 
     public ErrorHandler(Integer num, String key, String value){
         this.errorNum = num;
@@ -33,5 +34,14 @@ public class ErrorHandler{
 
     public void setErrorNum(Integer errorNum) {
         this.errorNum = errorNum;
+    }
+
+
+    public Object getParams() {
+        return params;
+    }
+
+    public void setParams(Object params) {
+        this.params = params;
     }
 }

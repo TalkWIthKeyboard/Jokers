@@ -1,4 +1,4 @@
-package com.example.Joker.form;
+package com.example.Joker.service.form;
 
 /**
  * Created by CoderSong on 16/11/21.
