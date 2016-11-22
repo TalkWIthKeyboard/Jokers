@@ -40,6 +40,7 @@ public class Config {
         list.add(dbSaveError);
         list.add(dbUpdateError);
         list.add(dbRemoveError);
+        this.errorHandler = list;
     }
 
     public ErrorHandler getHandler(String key) {

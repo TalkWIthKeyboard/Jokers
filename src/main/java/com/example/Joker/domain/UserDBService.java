@@ -114,7 +114,7 @@ public class UserDBService {
      */
     public String updateInfo(String id, DBObject user) {
         try {
-            BasicDBObject basicObj = new BasicDBObject("_id", id);
+            BasicDBObject basicObj = new BasicDBObject("_id", new ObjectId(id));
             this.user.update(basicObj, user, false, false);
             return null;
         } catch (Exception ex) {

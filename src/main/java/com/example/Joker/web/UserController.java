@@ -139,8 +139,12 @@ public class UserController {
             user.put("image", changeUserForm.getImage());
             user.put("score", changeUserForm.getScore());
             user.put("sex", changeUserForm.getSex());
-            userdb.updateInfo(id, user);
-            return config.getHandler("SUCCESS");
+            String error = userdb.updateInfo(id, user);
+            if (error == null){
+                return config.getHandler("SUCCESS");
+            } else {
+                return config.getHandler("DB_UPDATE_ERROR");
+            }
         } else {
             return config.getHandler("USER_ERROR");
         }
