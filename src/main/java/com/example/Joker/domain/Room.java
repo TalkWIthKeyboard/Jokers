@@ -1,0 +1,78 @@
+package com.example.Joker.domain;
+
+/**
+ * Created by CoderSong on 16/11/24.
+ */
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.util.Date;
+import java.util.List;
+
+@Document(collection="room")
+public class Room {
+
+    private List<String> userList;
+    // 是否是私人房间
+    private Integer isPrivate;
+    private String key;
+    private Date createDate;
+    private Date updateDate;
+
+    public Room() {
+
+    }
+
+    public Room(List<String> userList,
+                Integer isPrivate,
+                String key,
+                Date createDate,
+                Date updateDate) {
+        this.userList = userList;
+        this.isPrivate = isPrivate;
+        this.key = key;
+        this.createDate = createDate;
+        this.updateDate = updateDate;
+    }
+
+
+    public List<String> getUserList() {
+        return userList;
+    }
+
+    public void setUserList(List<String> userList) {
+        this.userList = userList;
+    }
+
+    public Integer getIsPrivate() {
+        return isPrivate;
+    }
+
+    public void setIsPrivate(Integer isPrivate) {
+        this.isPrivate = isPrivate;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public Date getCreateDate() {
+        return createDate;
+    }
+
+    public void setCreateDate(Date createDate) {
+        this.createDate = createDate;
+    }
+
+    public Date getUpdateDate() {
+        return updateDate;
+    }
+
+    public void setUpdateDate(Date updateDate) {
+        this.updateDate = updateDate;
+    }
+}
+

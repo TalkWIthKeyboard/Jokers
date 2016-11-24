@@ -29,6 +29,11 @@ public class Config {
                 userError = new ErrorHandler(410, "USER_ERROR", "不存在这个用户"),
                 pwdError = new ErrorHandler(411, "PWD_ERROR", "用户密码错误"),
                 liveError = new ErrorHandler(412, "LIVE_ERROR", "用户没有登录"),
+                roomError = new ErrorHandler(413,"ROOM_ERROR","没有找到这个房间"),
+                roomPwdError = new ErrorHandler(414,"ROOM_PWD_ERROR","房间密码错误"),
+                authorityError = new ErrorHandler(415,"AUTHORITY_ERROR","没有房主权限"),
+                userNumError = new ErrorHandler(416,"USER_NUM_ERROR","房间已经满员"),
+                userRoomError = new ErrorHandler(417,"USER_ROOM_ERROR","该用户不在这个房间"),
                 insideError = new ErrorHandler(500, "INSIDE_ERROR", "方法内部错误"),
                 dbSaveError = new ErrorHandler(420, "DB_SAVE_ERROR", "数据库的存储错误"),
                 dbUpdateError = new ErrorHandler(421, "DB_UPDATE_ERROR", "数据库的更新错误"),
@@ -39,6 +44,11 @@ public class Config {
         list.add(pwdError);
         list.add(insideError);
         list.add(liveError);
+        list.add(roomError);
+        list.add(roomPwdError);
+        list.add(authorityError);
+        list.add(userNumError);
+        list.add(userRoomError);
         list.add(dbSaveError);
         list.add(dbUpdateError);
         list.add(dbRemoveError);

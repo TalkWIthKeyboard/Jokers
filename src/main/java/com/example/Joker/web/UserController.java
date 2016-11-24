@@ -13,7 +13,6 @@ import com.example.Joker.service.Tool;
 
 import java.util.Map;
 
-
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -28,7 +27,7 @@ public class UserController {
      * @param id
      * @return
      */
-    @RequestMapping("/userInfo")
+    @RequestMapping(value = "/userInfo", method = RequestMethod.GET)
     public ErrorHandler getUserInfo(
             @RequestParam(value = "id", required = true) String id
     ) {

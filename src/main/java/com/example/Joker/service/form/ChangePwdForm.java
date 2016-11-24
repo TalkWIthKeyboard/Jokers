@@ -5,7 +5,6 @@ package com.example.Joker.service.form;
  */
 public class ChangePwdForm {
 
-    public String account;
     public String password;
     public String rePassword;
 }
