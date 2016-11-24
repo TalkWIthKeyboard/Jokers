@@ -6,5 +6,5 @@ package com.example.Joker.service.form;
 public class CreateRoomForm {
 
     public Integer isPrivate;
-    public String password;
+    public String key;
 }

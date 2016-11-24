@@ -40,11 +40,11 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-redis</artifactId>
 		</dependency>
-		<!-- session依赖 -->
-		<dependency>
-			<groupId>org.springframework.session</groupId>
-			<artifactId>spring-session</artifactId>
-		</dependency>
+		<!--&lt;!&ndash; session依赖 &ndash;&gt;-->
+		<!--<dependency>-->
+			<!--<groupId>org.springframework.session</groupId>-->
+			<!--<artifactId>spring-session</artifactId>-->
+		<!--</dependency>-->
 		<!--<dependency>-->
 			<!--<groupId>org.springframework.boot</groupId>-->
 			<!--<artifactId>spring-boot-starter-web-services</artifactId>-->

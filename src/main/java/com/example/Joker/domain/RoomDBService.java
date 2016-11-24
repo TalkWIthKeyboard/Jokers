@@ -15,7 +15,7 @@ public class RoomDBService {
     private DBCollection room;
 
     public RoomDBService() {
-        this.mongo = new Mongo("115.159.35.33",27016);
+        this.mongo = new Mongo("115.159.35.33", 27016);
         this.db = mongo.getDB("Jokers");
         this.room = db.getCollection("room");
     }
@@ -50,8 +50,8 @@ public class RoomDBService {
     public String saveData(DBObject roomdata) {
         try {
             Date today = new Date();
-            roomdata.put("createDate",today);
-            roomdata.put("updateDate",today);
+            roomdata.put("createDate", today);
+            roomdata.put("updateDate", today);
             this.room.save(roomdata);
             return null;
         } catch (Exception ex) {
@@ -72,8 +72,26 @@ public class RoomDBService {
         try {
             Date today = new Date();
             BasicDBObject basicObj = new BasicDBObject("_id", new ObjectId(id));
-            user.put("updateDate",today);
+            user.put("updateDate", today);
             this.room.update(basicObj, user, false, false);
+            return null;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return "error";
+        }
+    }
+
+
+    /**
+     * 根据id删除数据
+     *
+     * @param id
+     * @return
+     */
+    public String removeById(String id) {
+        try {
+            BasicDBObject basicObj = new BasicDBObject("_id", new ObjectId(id));
+            this.room.remove(basicObj);
             return null;
         } catch (Exception ex) {
             ex.printStackTrace();

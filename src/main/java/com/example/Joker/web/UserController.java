@@ -27,7 +27,7 @@ public class UserController {
      * @param id
      * @return
      */
-    @RequestMapping(value = "/userInfo", method = RequestMethod.GET)
+    @RequestMapping(value = "/user/userInfo", method = RequestMethod.GET)
     public ErrorHandler getUserInfo(
             @RequestParam(value = "id", required = true) String id
     ) {
@@ -48,7 +48,7 @@ public class UserController {
      * @param changePwdForm
      * @return
      */
-    @RequestMapping(value = "/password", method = RequestMethod.PUT)
+    @RequestMapping(value = "/user/password", method = RequestMethod.PUT)
     public ErrorHandler changePassword(
             @RequestParam(value = "id", required = true) String id,
             @RequestBody ChangePwdForm changePwdForm
@@ -79,7 +79,7 @@ public class UserController {
      * @param UserForm
      * @return
      */
-    @RequestMapping(value = "/", method = RequestMethod.POST)
+    @RequestMapping(value = "/user", method = RequestMethod.POST)
     public ErrorHandler saveUser(
             @RequestBody User UserForm
     ) {
@@ -133,7 +133,7 @@ public class UserController {
      * @param changeUserForm
      * @return
      */
-    @RequestMapping(value = "/", method = RequestMethod.PUT)
+    @RequestMapping(value = "/user", method = RequestMethod.PUT)
     public ErrorHandler changeInfo(
             @RequestParam(value = "id", required = true) String id,
             @RequestBody User changeUserForm

@@ -1,7 +1,6 @@
 package com.example.Joker.web;
 
 import com.example.Joker.Config;
-import com.example.Joker.domain.Room;
 import com.example.Joker.domain.RoomDBService;
 import com.example.Joker.service.ErrorHandler;
 import com.example.Joker.service.Tool;
@@ -38,8 +37,8 @@ public class RoomController {
             HttpServletRequest request
     ) {
         DBObject room = new BasicDBObject();
-        if (roomForm.password != "") {
-            roomForm.password = tool.stringToMD5(roomForm.password);
+        if (roomForm.key != "") {
+            roomForm.key = tool.stringToMD5(roomForm.key);
         }
 
         DBObject user = (DBObject) request.getSession().getAttribute("user");
@@ -47,7 +46,7 @@ public class RoomController {
         List<String> userList = new ArrayList<String>();
         userList.add(userid);
         room.put("isPrivate", roomForm.isPrivate);
-        room.put("key", roomForm.password);
+        room.put("key", roomForm.key);
         room.put("userList", userList);
         String error = roomdb.saveData(room);
         if (error == null) {
@@ -72,20 +71,19 @@ public class RoomController {
             HttpServletRequest request
     ) {
         DBObject roomObj = roomdb.findById(id);
-        Room room = (Room) roomObj;
         // 密码编码
         if (key != "") {
             key = tool.stringToMD5(key);
         }
 
         if (roomObj != null) {
-            if (room.getUserList().size() == 3) {
+            List userList = (List) roomObj.get("userList");
+            if (userList.size() == 3) {
                 return config.getHandler("USER_NUM_ERROR");
             } else {
-                if (room.getIsPrivate() == 1 && !key.equals(room.getKey())) {
+                if ((Integer) roomObj.get("isPrivate") == 1 && !key.equals((String) roomObj.get("key"))) {
                     return config.getHandler("ROOM_PWD_ERROR");
                 } else {
-                    List<String> userList = room.getUserList();
                     DBObject user = (DBObject) request.getSession().getAttribute("user");
                     String userid = user.get("_id").toString();
                     userList.add(userid);
@@ -119,25 +117,30 @@ public class RoomController {
             HttpServletRequest request
     ) {
         DBObject roomObj = roomdb.findById(id);
-        Room room = (Room) roomObj;
-        DBObject user = (DBObject) request.getSession().getAttribute("user");
-        String userid = user.get("_id").toString();
-        // 密码编码
-        if (roomForm.password != "") {
-            roomForm.password = tool.stringToMD5(roomForm.password);
-        }
+        if (roomObj != null){
+            List userList = (List) roomObj.get("userList");
+            DBObject user = (DBObject) request.getSession().getAttribute("user");
+            String userid = user.get("_id").toString();
+            // 密码编码
+            if (roomForm.key != "") {
+                roomForm.key = tool.stringToMD5(roomForm.key);
+            }
 
-        if (room.getUserList().get(0).equals(userid)) {
-            roomObj.put("isPrivate", roomForm.isPrivate);
-            roomObj.put("key", roomForm.password);
-            String error = roomdb.updateInfo(id, roomObj);
-            if (error == null) {
-                return config.getHandler("SUCCESS");
+            // 判断是否是房主
+            if (userList.get(0).equals(userid)) {
+                roomObj.put("isPrivate", roomForm.isPrivate);
+                roomObj.put("key", roomForm.key);
+                String error = roomdb.updateInfo(id, roomObj);
+                if (error == null) {
+                    return config.getHandler("SUCCESS");
+                } else {
+                    return config.getHandler("DB_UPDATE_ERROR");
+                }
             } else {
-                return config.getHandler("DB_UPDATE_ERROR");
+                return config.getHandler("AUTHORITY_ERROR");
             }
         } else {
-            return config.getHandler("AUTHORITY_ERROR");
+            return config.getHandler("ROOM_ERROR");
         }
     }
 
@@ -155,29 +158,42 @@ public class RoomController {
             HttpServletRequest request
     ) {
         DBObject roomObj = roomdb.findById(id);
-        Room room = (Room) roomObj;
-        DBObject user = (DBObject) request.getSession().getAttribute("user");
-        String userid = user.get("_id").toString();
-        Integer flag = -1;
-        List<String> userList = room.getUserList();
-        for (Integer index = 0; index < userList.size(); index++) {
-            if (userList.get(index).equals(userid)) {
-                flag = index;
-                break;
+        if (roomObj != null){
+            List<String> userList = (List<String>) roomObj.get("userList");
+            DBObject user = (DBObject) request.getSession().getAttribute("user");
+            String userid = user.get("_id").toString();
+            int flag = -1;
+            for (int index = 0; index < userList.size(); index++) {
+                if (userList.get(index).equals(userid)) {
+                    flag = index;
+                    break;
+                }
             }
-        }
 
-        if (flag == -1) {
-            return config.getHandler("USER_ROOM_ERROR");
-        } else {
-            userList.remove(flag);
-            roomObj.put("userList", userList);
-            String error = roomdb.updateInfo(id, roomObj);
-            if (error == null) {
-                return config.getHandler("SUCCESS");
+            if (flag == -1) {
+                return config.getHandler("USER_ROOM_ERROR");
             } else {
-                return config.getHandler("DB_UPDATE_ERROR");
+                // 如果人数等于1人还退出房间，那就把房间删了
+                if (userList.size() > 1){
+                    userList.remove(flag);
+                    roomObj.put("userList", userList);
+                    String error = roomdb.updateInfo(id, roomObj);
+                    if (error == null) {
+                        return config.getHandler("SUCCESS");
+                    } else {
+                        return config.getHandler("DB_UPDATE_ERROR");
+                    }
+                } else {
+                    String error = roomdb.removeById(id);
+                    if (error == null){
+                        return config.getHandler("SUCCESS");
+                    } else {
+                        return config.getHandler("DB_REMOVE_ERROR");
+                    }
+                }
             }
+        } else {
+            return config.getHandler("ROOM_ERROR");
         }
     }
 }
