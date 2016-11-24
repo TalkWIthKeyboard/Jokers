@@ -20,7 +20,7 @@ public class UserController {
 
     Tool tool = new Tool();
     Config config = new Config();
-
+    UserDBService userdb = new UserDBService();
 
     /**
      * 获取用户的基本信息
@@ -32,7 +32,6 @@ public class UserController {
     public ErrorHandler getUserInfo(
             @RequestParam(value = "id", required = true) String id
     ) {
-        UserDBService userdb = new UserDBService();
         DBObject user = userdb.findById(id);
         if (user != null) {
             ErrorHandler success = config.getHandler("SUCCESS");
@@ -55,7 +54,6 @@ public class UserController {
             @RequestParam(value = "id", required = true) String id,
             @RequestBody ChangePwdForm changePwdForm
     ) {
-        UserDBService userdb = new UserDBService();
         DBObject user = userdb.findById(id);
         if (user != null) {
             Map userMap = user.toMap();
@@ -86,7 +84,6 @@ public class UserController {
     public ErrorHandler saveUser(
             @RequestBody User UserForm
     ) {
-        UserDBService userdb = new UserDBService();
         DBObject user = new BasicDBObject();
         String password = tool.stringToMD5(UserForm.getPassword());
         user.put("account", UserForm.getAccount());
@@ -114,7 +111,6 @@ public class UserController {
             @RequestParam(value = "password", required = true) String password,
             HttpServletRequest request
     ) {
-        UserDBService userdb = new UserDBService();
         DBObject user = userdb.findByAccount(account);
         if (user != null) {
             Map userMap = user.toMap();
@@ -143,7 +139,6 @@ public class UserController {
             @RequestParam(value = "id", required = true) String id,
             @RequestBody User changeUserForm
     ) {
-        UserDBService userdb = new UserDBService();
         DBObject user = userdb.findById(id);
         if (user != null) {
             user.put("username", changeUserForm.getUsername());

@@ -20,8 +20,8 @@ public class UserDBService {
     private DBCollection user;
 
     public UserDBService() {
-        this.mongo = new Mongo();
-        this.db = mongo.getDB("Jockers");
+        this.mongo = new Mongo("115.159.35.33",27016);
+        this.db = mongo.getDB("Jokers");
         this.user = db.getCollection("user");
     }
 
