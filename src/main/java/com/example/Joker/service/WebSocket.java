@@ -50,6 +50,7 @@ public class WebSocket {
         System.out.println("新连接的用户房间ID为" + httpSession.getAttribute("roomId"));
     }
 
+
     /**
      * WebSocket的断开连接
      */
@@ -90,11 +91,14 @@ public class WebSocket {
                 sand.addPokers();
                 sand.washPokers();
                 List<List<Poker>> players = sand.getPlayers();
+
                 // 领牌
-                DBObject user = (DBObject) this.httpSession.getAttribute("user");
-                String roomId = this.httpSession.getAttribute("roomId").toString();
-                List<Poker> userPokers = players.get(sendPoker(user.get("_id").toString(), roomId));
-                this.sendMessage(printPokers(userPokers));
+                for (WebSocket item : webSocketSet) {
+                    DBObject user = (DBObject) item.httpSession.getAttribute("user");
+                    String roomId = item.httpSession.getAttribute("roomId").toString();
+                    List<Poker> userPokers = players.get(sendPoker(user.get("_id").toString(), roomId));
+                    item.sendMessage(printPokers(userPokers));
+                }
             }
         } else if (message.equals("userClearReady")) {
             // 取消准备
