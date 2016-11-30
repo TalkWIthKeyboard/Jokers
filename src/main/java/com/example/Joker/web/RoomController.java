@@ -51,6 +51,7 @@ public class RoomController {
         room.put("isPrivate", roomForm.isPrivate);
         room.put("key", roomForm.key);
         room.put("userList", userList);
+        room.put("readyNum",0);
         String roomId = roomdb.saveData(room);
         if (roomId.equals("error")) {
             return config.getHandler("DB_SAVE_ERROR");

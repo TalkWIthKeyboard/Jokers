@@ -1,5 +1,6 @@
 package com.example.Joker.service;
 
+import com.example.Joker.Config;
 import com.example.Joker.domain.Room;
 import com.example.Joker.domain.RoomDBService;
 import com.mongodb.DBObject;
@@ -72,6 +73,7 @@ public class WebSocket {
     public void onMessage(String message, Session session) throws IOException {
         System.out.println("来自客户端的消息:" + message);
 
+
         // 客户端发送准备信息
         if (message.equals("userReady")) {
             userReadyOrNot(this.httpSession.getAttribute("roomId").toString(), 1);
@@ -82,15 +84,23 @@ public class WebSocket {
                 item.sendMessage("用户 " + user.get("_id") + "在房间 " + room + "准备");
             }
             // 如果3个人都准备了就发牌开始
-            if (readyNumber(this.httpSession.getAttribute("roomId").toString()) == 3){
+            if (readyNumber(this.httpSession.getAttribute("roomId").toString()) == 3) {
+                // 发牌
                 Sands sand = new Sands();
                 sand.addPokers();
                 sand.washPokers();
                 List<List<Poker>> players = sand.getPlayers();
+                // 领牌
+                DBObject user = (DBObject) this.httpSession.getAttribute("user");
+                String roomId = this.httpSession.getAttribute("roomId").toString();
+                List<Poker> userPokers = players.get(sendPoker(user.get("_id").toString(), roomId));
+                this.sendMessage(printPokers(userPokers));
             }
         } else if (message.equals("userClearReady")) {
             // 取消准备
             userReadyOrNot(this.httpSession.getAttribute("roomId").toString(), -1);
+        } else if (message.equals("playPocker")) {
+            // 出牌
         }
     }
 
@@ -144,4 +154,31 @@ public class WebSocket {
         return readyNum;
     }
 
+    /**
+     * 按照序号发牌
+     *
+     * @return
+     */
+    public static synchronized int sendPoker(String userId, String roomId) {
+        RoomDBService roomdb = new RoomDBService();
+        DBObject room = roomdb.findById(roomId);
+        List<String> userList = (List<String>) room.get("userList");
+        int index = userList.indexOf(userId);
+        return index;
+    }
+
+    /**
+     * 把牌打印下来，（测试用）
+     *
+     * @param userPokers
+     */
+    public static synchronized String printPokers(List<Poker> userPokers) {
+        Config config = new Config();
+        String print = new String();
+        for (int i = 0; i < userPokers.size(); i++) {
+            print += config.getColorHandler().get(userPokers.get(i).getColor()) +
+                            config.getPointHandler().get(userPokers.get(i).getPoint()) + " ";
+        }
+        return print;
+    }
 }
