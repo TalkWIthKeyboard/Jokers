@@ -17,6 +17,7 @@ public class User {
     private String image;
     private Integer sex;
     private Integer score;
+    private String roomId;
     private Date createDate;
     private Date updateDate;
 
@@ -30,6 +31,7 @@ public class User {
                 String image,
                 Integer sex,
                 Integer score,
+                String roomId,
                 Date createDate,
                 Date updateDate) {
         this.username = username;
@@ -38,6 +40,7 @@ public class User {
         this.image = image;
         this.sex = sex;
         this.score = score;
+        this.roomId = roomId;
         this.createDate = createDate;
         this.updateDate = updateDate;
     }
@@ -108,5 +111,13 @@ public class User {
 
     public void setAccount(String account) {
         this.account = account;
+    }
+
+    public String getRoomId() {
+        return roomId;
+    }
+
+    public void setRoomId(String roomId) {
+        this.roomId = roomId;
     }
 }

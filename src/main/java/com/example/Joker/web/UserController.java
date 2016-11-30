@@ -4,6 +4,7 @@ import com.example.Joker.Config;
 import com.example.Joker.domain.User;
 import com.example.Joker.service.form.ChangePwdForm;
 import com.example.Joker.service.ErrorHandler;
+import com.example.Joker.service.form.LoginForm;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import org.apache.catalina.servlet4preview.http.HttpServletRequest;
@@ -89,6 +90,7 @@ public class UserController {
         user.put("password", password);
         user.put("username", UserForm.getUsername());
         user.put("sex", UserForm.getSex());
+        user.put("roomId", null);
         String error = userdb.saveData(user);
         if (error == null) {
             return config.getHandler("SUCCESS");
@@ -100,20 +102,19 @@ public class UserController {
     /**
      * 用户登录
      *
-     * @param account
-     * @param password
+     * @param login
+     * @param request
      * @return
      */
-    @RequestMapping(value = "/", method = RequestMethod.GET)
+    @RequestMapping(value = "/login", method = RequestMethod.POST)
     public ErrorHandler login(
-            @RequestParam(value = "account", required = true) String account,
-            @RequestParam(value = "password", required = true) String password,
+            @RequestBody LoginForm login,
             HttpServletRequest request
     ) {
-        DBObject user = userdb.findByAccount(account);
+        DBObject user = userdb.findByAccount(login.account);
         if (user != null) {
             Map userMap = user.toMap();
-            String pwdMd5 = tool.stringToMD5(password);
+            String pwdMd5 = tool.stringToMD5(login.password);
             // 登录后存入session
             request.getSession().setAttribute("user", user);
             if (pwdMd5.equals(userMap.get("password").toString())) {
@@ -154,5 +155,4 @@ public class UserController {
             return config.getHandler("USER_ERROR");
         }
     }
-
 }

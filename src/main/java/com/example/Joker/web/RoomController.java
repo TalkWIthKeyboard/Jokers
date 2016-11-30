@@ -2,6 +2,7 @@ package com.example.Joker.web;
 
 import com.example.Joker.Config;
 import com.example.Joker.domain.RoomDBService;
+import com.example.Joker.domain.UserDBService;
 import com.example.Joker.service.ErrorHandler;
 import com.example.Joker.service.Tool;
 import com.example.Joker.service.form.CreateRoomForm;
@@ -23,6 +24,7 @@ public class RoomController {
 
     Tool tool = new Tool();
     Config config = new Config();
+    UserDBService userdb = new UserDBService();
     RoomDBService roomdb = new RoomDBService();
 
     /**
@@ -37,22 +39,32 @@ public class RoomController {
             HttpServletRequest request
     ) {
         DBObject room = new BasicDBObject();
-        if (roomForm.key != "") {
+        if (!roomForm.key.equals("")) {
             roomForm.key = tool.stringToMD5(roomForm.key);
         }
 
         DBObject user = (DBObject) request.getSession().getAttribute("user");
+        // 修改房间信息
         String userid = user.get("_id").toString();
         List<String> userList = new ArrayList<String>();
         userList.add(userid);
         room.put("isPrivate", roomForm.isPrivate);
         room.put("key", roomForm.key);
         room.put("userList", userList);
-        String error = roomdb.saveData(room);
-        if (error == null) {
-            return config.getHandler("SUCCESS");
-        } else {
+        String roomId = roomdb.saveData(room);
+        if (roomId.equals("error")) {
             return config.getHandler("DB_SAVE_ERROR");
+        } else {
+            // 同步session信息
+            request.getSession().setAttribute("roomId", roomId);
+            // 同步修改用户的房间信息
+            user.put("roomId", roomId);
+            String error = userdb.updateInfo(userid, user);
+            if (error == null) {
+                return config.getHandler("SUCCESS");
+            } else {
+                return config.getHandler("DB_CHANGE_ERROR");
+            }
         }
     }
 
@@ -72,7 +84,7 @@ public class RoomController {
     ) {
         DBObject roomObj = roomdb.findById(id);
         // 密码编码
-        if (key != "") {
+        if (!key.equals("")) {
             key = tool.stringToMD5(key);
         }
 
@@ -90,7 +102,16 @@ public class RoomController {
                     roomObj.put("userList", userList);
                     String error = roomdb.updateInfo(id, roomObj);
                     if (error == null) {
-                        return config.getHandler("SUCCESS");
+                        // 同步session信息
+                        request.getSession().setAttribute("roomId", id);
+                        // 同步用户的房间信息
+                        user.put("roomId", id);
+                        String err = userdb.updateInfo(userid, user);
+                        if (err == null) {
+                            return config.getHandler("SUCCESS");
+                        } else {
+                            return config.getHandler("DB_UPDATE_ERROR");
+                        }
                     } else {
                         return config.getHandler("DB_UPDATE_ERROR");
                     }
@@ -117,12 +138,12 @@ public class RoomController {
             HttpServletRequest request
     ) {
         DBObject roomObj = roomdb.findById(id);
-        if (roomObj != null){
+        if (roomObj != null) {
             List userList = (List) roomObj.get("userList");
             DBObject user = (DBObject) request.getSession().getAttribute("user");
             String userid = user.get("_id").toString();
             // 密码编码
-            if (roomForm.key != "") {
+            if (!roomForm.key.equals("")) {
                 roomForm.key = tool.stringToMD5(roomForm.key);
             }
 
@@ -158,7 +179,7 @@ public class RoomController {
             HttpServletRequest request
     ) {
         DBObject roomObj = roomdb.findById(id);
-        if (roomObj != null){
+        if (roomObj != null) {
             List<String> userList = (List<String>) roomObj.get("userList");
             DBObject user = (DBObject) request.getSession().getAttribute("user");
             String userid = user.get("_id").toString();
@@ -173,23 +194,31 @@ public class RoomController {
             if (flag == -1) {
                 return config.getHandler("USER_ROOM_ERROR");
             } else {
-                // 如果人数等于1人还退出房间，那就把房间删了
-                if (userList.size() > 1){
-                    userList.remove(flag);
-                    roomObj.put("userList", userList);
-                    String error = roomdb.updateInfo(id, roomObj);
-                    if (error == null) {
-                        return config.getHandler("SUCCESS");
+                // 先同步用户房间信息和session信息
+                request.getSession().setAttribute("roomId", null);
+                user.put("roomId", null);
+                String err = userdb.updateInfo(id, user);
+                if (err == null) {
+                    // 如果人数等于1人还退出房间，那就把房间删了
+                    if (userList.size() > 1) {
+                        userList.remove(flag);
+                        roomObj.put("userList", userList);
+                        String error = roomdb.updateInfo(id, roomObj);
+                        if (error == null) {
+                            return config.getHandler("SUCCESS");
+                        } else {
+                            return config.getHandler("DB_UPDATE_ERROR");
+                        }
                     } else {
-                        return config.getHandler("DB_UPDATE_ERROR");
+                        String error = roomdb.removeById(id);
+                        if (error == null) {
+                            return config.getHandler("SUCCESS");
+                        } else {
+                            return config.getHandler("DB_REMOVE_ERROR");
+                        }
                     }
                 } else {
-                    String error = roomdb.removeById(id);
-                    if (error == null){
-                        return config.getHandler("SUCCESS");
-                    } else {
-                        return config.getHandler("DB_REMOVE_ERROR");
-                    }
+                    return config.getHandler("DB_UPDATE_ERROR");
                 }
             }
         } else {

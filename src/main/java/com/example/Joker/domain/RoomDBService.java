@@ -53,7 +53,7 @@ public class RoomDBService {
             roomdata.put("createDate", today);
             roomdata.put("updateDate", today);
             this.room.save(roomdata);
-            return null;
+            return roomdata.get("_id").toString();
         } catch (Exception ex) {
             ex.printStackTrace();
             return "error";
