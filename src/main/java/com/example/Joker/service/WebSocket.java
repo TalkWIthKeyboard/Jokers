@@ -7,6 +7,7 @@ import javax.servlet.http.HttpSession;
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
@@ -70,6 +71,10 @@ public class WebSocket {
         System.out.println("来自客户端的消息:" + message);
         // 群发消息
         if (message.equals("ready")){
+//            Sands sand = new Sands();
+//            sand.addPokers();
+//            sand.washPokers();
+//            List<List<Poker>> players = sand.getPlayers();
             for (WebSocket item : webSocketSet) {
                 DBObject user = (DBObject) item.httpSession.getAttribute("user");
                 String room = item.httpSession.getAttribute("roomId").toString();
