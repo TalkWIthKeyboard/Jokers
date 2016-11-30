@@ -1,5 +1,7 @@
 package com.example.Joker.service;
 
+import com.example.Joker.domain.Room;
+import com.example.Joker.domain.RoomDBService;
 import com.mongodb.DBObject;
 import org.springframework.stereotype.Component;
 
@@ -69,17 +71,26 @@ public class WebSocket {
     @OnMessage
     public void onMessage(String message, Session session) throws IOException {
         System.out.println("来自客户端的消息:" + message);
-        // 群发消息
-        if (message.equals("ready")){
-//            Sands sand = new Sands();
-//            sand.addPokers();
-//            sand.washPokers();
-//            List<List<Poker>> players = sand.getPlayers();
+
+        // 客户端发送准备信息
+        if (message.equals("userReady")) {
+            userReadyOrNot(this.httpSession.getAttribute("roomId").toString(), 1);
+            // 通知所有人他准备了（测试用）
             for (WebSocket item : webSocketSet) {
                 DBObject user = (DBObject) item.httpSession.getAttribute("user");
                 String room = item.httpSession.getAttribute("roomId").toString();
-                item.sendMessage("用户 "+ user.get("_id") + "在房间 " + room + "准备");
+                item.sendMessage("用户 " + user.get("_id") + "在房间 " + room + "准备");
             }
+            // 如果3个人都准备了就发牌开始
+            if (readyNumber(this.httpSession.getAttribute("roomId").toString()) == 3){
+                Sands sand = new Sands();
+                sand.addPokers();
+                sand.washPokers();
+                List<List<Poker>> players = sand.getPlayers();
+            }
+        } else if (message.equals("userClearReady")) {
+            // 取消准备
+            userReadyOrNot(this.httpSession.getAttribute("roomId").toString(), -1);
         }
     }
 
@@ -104,4 +115,33 @@ public class WebSocket {
     public static synchronized void subOnlineCount() {
         WebSocket.onlineCount--;
     }
+
+    /**
+     * 用户准备和取消准备动作
+     *
+     * @param roomId
+     * @param isReady -1为取消准备， 1为准备
+     */
+    public static synchronized void userReadyOrNot(String roomId, int isReady) {
+        RoomDBService roomdb = new RoomDBService();
+        DBObject room = roomdb.findById(roomId);
+        Integer readyNum = (Integer) room.get("readyNum");
+        room.put("readyNum", readyNum + isReady * 1);
+        roomdb.updateInfo(roomId, room);
+    }
+
+
+    /**
+     * 获取房间准备人数
+     *
+     * @param roomId
+     * @return
+     */
+    public static synchronized Integer readyNumber(String roomId) {
+        RoomDBService roomdb = new RoomDBService();
+        DBObject room = roomdb.findById(roomId);
+        Integer readyNum = (Integer) room.get("readyNum");
+        return readyNum;
+    }
+
 }

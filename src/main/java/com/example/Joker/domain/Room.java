@@ -15,6 +15,7 @@ public class Room {
     // 是否是私人房间
     private Integer isPrivate;
     private String key;
+    private Integer readyNum;
     private Date createDate;
     private Date updateDate;
 
@@ -30,6 +31,7 @@ public class Room {
         this.userList = userList;
         this.isPrivate = isPrivate;
         this.key = key;
+        this.readyNum = 0;
         this.createDate = createDate;
         this.updateDate = updateDate;
     }
@@ -73,6 +75,14 @@ public class Room {
 
     public void setUpdateDate(Date updateDate) {
         this.updateDate = updateDate;
+    }
+
+    public Integer getReadyNum() {
+        return readyNum;
+    }
+
+    public void setReadyNum(Integer readyNum) {
+        this.readyNum = readyNum;
     }
 }
 
