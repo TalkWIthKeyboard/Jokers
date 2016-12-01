@@ -88,9 +88,7 @@ public class WebSocket {
             userReadyOrNot(this.roomId, 1);
             // 通知所有人他准备了（测试用）
             for (WebSocket item : webSocketSet) {
-                String thisUserId = item.userId;
-                String thisRoomId = item.roomId;
-                item.sendMessage("用户 " + thisUserId + "在房间 " + thisRoomId + "准备");
+                item.sendMessage("用户 " + this.userId + "在房间 " + this.roomId + "准备");
             }
             // 如果3个人都准备了就发牌开始
             if (readyNumber(this.roomId) == 1) {
@@ -121,7 +119,7 @@ public class WebSocket {
             Matcher robMatcher = robPattern.matcher(message);
             // 出牌
             if (playPokersMatcher.matches()) {
-                playPoker(message);
+                playPoker(message, this.userId);
             } else if (robMatcher.matches()) {
                 robLandlord(message, this.roomId, this.userId);
             } else {
@@ -214,7 +212,7 @@ public class WebSocket {
      *
      * @param message
      */
-    public void playPoker(String message) throws IOException {
+    public void playPoker(String message, String userId) throws IOException {
         // 对前端的出牌请求进行转换
         String pokers = message.split(" ")[1];
         String[] pokerList = pokers.split(",");
@@ -244,7 +242,6 @@ public class WebSocket {
             // 给前端发消息
             this.sendMessage("你现在手上还有" + printPokers(this.userPokers));
             for (WebSocket item : webSocketSet) {
-                String userId = item.userId;
                 item.sendMessage("玩家 " + userId + "出了" + printPokers(pokerObjList));
             }
         } else {
