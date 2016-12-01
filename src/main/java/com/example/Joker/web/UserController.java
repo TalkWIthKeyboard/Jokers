@@ -120,7 +120,7 @@ public class UserController {
 
             // 测试
             String testId = ((DBObject) request.getSession().getAttribute("user")).get("_id").toString();
-            System.out.printf("login   " + testId);
+            System.out.println("login   " + testId);
             if (pwdMd5.equals(userMap.get("password").toString())) {
                 return config.getHandler("SUCCESS");
             } else {

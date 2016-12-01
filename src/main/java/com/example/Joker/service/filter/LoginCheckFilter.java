@@ -32,7 +32,7 @@ public class LoginCheckFilter implements Filter {
         if (user != null) {
 
             // 测试
-            System.out.printf("filter " + user.get("_id").toString());
+            System.out.println("filter " + user.get("_id").toString());
             chain.doFilter(request, response);
         } else {
             httpResponse.setContentType("text/html;charset=utf-8");
