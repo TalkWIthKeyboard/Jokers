@@ -112,12 +112,21 @@ public class WebSocket {
         } else if (message.equals("userClearReady")) {
             // 取消准备
             userReadyOrNot(this.roomId, -1);
+        } else if (message.equals("gameOver")) {
+            // 游戏结束
+            finishGame();
         } else {
-            Pattern pattern = Pattern.compile("^playPokers.*");
-            Matcher playPokersMatcher = pattern.matcher(message);
+            Pattern playPokersPattern = Pattern.compile("^playPokers.*");
+            Matcher playPokersMatcher = playPokersPattern.matcher(message);
+            Pattern robPattern = Pattern.compile("^rob.*");
+            Matcher robMatcher = robPattern.matcher(message);
             // 出牌
             if (playPokersMatcher.matches()) {
                 playPoker(message);
+            } else if (robMatcher.matches()) {
+                robLandlord(message);
+            } else {
+
             }
         }
     }
@@ -194,8 +203,8 @@ public class WebSocket {
         Config config = new Config();
         String print = new String();
         for (int i = 0; i < userPokers.size(); i++) {
-            print += config.getColorHandler().get(userPokers.get(i).getColor()) +
-                    config.getPointHandler().get(userPokers.get(i).getPoint()) + " ";
+            print += config.getColorHandler().get(userPokers.get(i).getColor()) + "/" +
+                    config.getPointHandler().get(userPokers.get(i).getPoint()) + ",";
         }
         return print;
     }
@@ -241,7 +250,39 @@ public class WebSocket {
             }
         } else {
             // 牌出完了,游戏结束
-            this.sendMessage("game over!");
+            finishGame();
         }
+    }
+
+
+    /**
+     * 处理客户端抢地主的消息
+     *
+     * @param message
+     * @throws IOException
+     */
+    public void robLandlord(String message) throws IOException {
+        // 对前端的抢地主请求进行转换
+        Integer robNumber = Integer.parseInt(message.split(" ")[1]);
+
+        if (robNumber == 3) {
+            for (WebSocket item : webSocketSet) {
+                String userId = item.userId;
+                item.sendMessage("玩家 " + userId + "抢到了地主");
+            }
+        }
+    }
+
+
+    /**
+     * 游戏结束
+     */
+    public void finishGame() throws IOException {
+        for (WebSocket item : webSocketSet) {
+            String userId = item.userId;
+            item.sendMessage("玩家 " + userId + "赢了！");
+        }
+
+        // TODO 计算积分变化并修改
     }
 }

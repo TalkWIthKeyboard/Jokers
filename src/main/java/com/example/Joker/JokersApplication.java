@@ -4,6 +4,7 @@ package com.example.Joker;
  * Created by CoderSong on 16/11/21.
  */
 
+import com.example.Joker.service.filter.EnterRoomFilter;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -28,7 +29,7 @@ public class JokersApplication extends WebMvcConfigurerAdapter {
     }
 
     /**
-     * 注册过滤器
+     * 注册是否登录过滤器
      *
      * @return
      */
@@ -46,6 +47,25 @@ public class JokersApplication extends WebMvcConfigurerAdapter {
         registrationBean.setUrlPatterns(urlPatterns);
 
         return registrationBean;
+    }
+
+    /**
+     * 注册是否进入房间过滤器
+     *
+     * @return
+     */
+    @Bean
+    public FilterRegistrationBean filterJoinRoomBean() {
+        FilterRegistrationBean joinRoomBean = new FilterRegistrationBean();
+
+        // 给/users/*路由注册登录检测过滤器
+        EnterRoomFilter enterRoomCheckFilter = new EnterRoomFilter();
+        joinRoomBean.setFilter(enterRoomCheckFilter);
+        List<String> urlPatterns = new ArrayList<String>();
+        urlPatterns.add("/test");
+        joinRoomBean.setUrlPatterns(urlPatterns);
+
+        return joinRoomBean;
     }
 
     /**

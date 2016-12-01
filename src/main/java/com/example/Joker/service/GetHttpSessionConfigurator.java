@@ -21,7 +21,6 @@ public class GetHttpSessionConfigurator extends ServerEndpointConfig.Configurato
                                 HandshakeResponse response)
     {
         HttpSession httpSession = (HttpSession)request.getHttpSession();
-        System.out.println("http session roomId!" + httpSession.getAttribute("roomId"));
         config.getUserProperties().put(HttpSession.class.getName(),httpSession);
     }
 }
