@@ -1,7 +1,6 @@
 package com.example.Joker.service;
 
 import com.example.Joker.Config;
-import com.example.Joker.domain.Room;
 import com.example.Joker.domain.RoomDBService;
 import com.mongodb.DBObject;
 import org.springframework.stereotype.Component;
@@ -46,8 +45,8 @@ public class WebSocket {
         // 连接状态持久化保存(可能后面要改为redis)
         DBObject user = (DBObject) httpSession.getAttribute("user");
         System.out.println("有新链接加入!当前在线人数为" + getOnlineCount());
-        System.out.println("新连接的用户ID为" + user.get("_id"));
-        System.out.println("新连接的用户房间ID为" + httpSession.getAttribute("roomId"));
+//        System.out.println("新连接的用户ID为" + user.get("_id"));
+//        System.out.println("新连接的用户房间ID为" + httpSession.getAttribute("roomId"));
     }
 
 

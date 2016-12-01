@@ -1,5 +1,7 @@
 package com.example.Joker.service.filter;
 
+import com.mongodb.DBObject;
+
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
@@ -26,8 +28,11 @@ public class LoginCheckFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         HttpSession session = httpRequest.getSession(true);
-        Object user = session.getAttribute("user");
+        DBObject user = (DBObject) session.getAttribute("user");
         if (user != null) {
+
+            // 测试
+            System.out.printf("filter " + user.get("_id").toString());
             chain.doFilter(request, response);
         } else {
             httpResponse.setContentType("text/html;charset=utf-8");
