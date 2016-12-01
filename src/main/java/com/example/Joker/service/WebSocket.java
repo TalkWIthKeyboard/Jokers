@@ -234,7 +234,11 @@ public class WebSocket {
 
         if (this.userPokers.size() > 0) {
             // 给前端发消息
-            this.sendMessage(printPokers(this.userPokers));
+            this.sendMessage("你现在手上还有" + printPokers(this.userPokers));
+            for (WebSocket item : webSocketSet) {
+                String userId = item.userId;
+                item.sendMessage("玩家 " + userId + "出了" + printPokers(pokerObjList));
+            }
         } else {
             // 牌出完了,游戏结束
             this.sendMessage("game over!");
