@@ -30,9 +30,6 @@ public class LoginCheckFilter implements Filter {
         HttpSession session = httpRequest.getSession(true);
         DBObject user = (DBObject) session.getAttribute("user");
         if (user != null) {
-
-            // 测试
-            System.out.println("filter " + user.get("_id").toString());
             chain.doFilter(request, response);
         } else {
             httpResponse.setContentType("text/html;charset=utf-8");

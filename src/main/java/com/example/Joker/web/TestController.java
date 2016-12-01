@@ -24,6 +24,8 @@ public class TestController {
         DBObject user = (DBObject) request.getSession().getAttribute("user");
         String userId = user.get("_id").toString();
         String roomId = (String) request.getSession().getAttribute("roomId");
+        System.out.println("test " + userId);
+        System.out.println("test " + roomId);
         model.addAttribute("userId", userId);
         model.addAttribute("roomId", roomId);
         return "index";

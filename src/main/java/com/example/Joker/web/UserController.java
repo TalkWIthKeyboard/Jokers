@@ -117,10 +117,6 @@ public class UserController {
             String pwdMd5 = tool.stringToMD5(login.password);
             // 登录后存入session
             request.getSession().setAttribute("user", user);
-
-            // 测试
-            String testId = ((DBObject) request.getSession().getAttribute("user")).get("_id").toString();
-            System.out.println("login   " + testId);
             if (pwdMd5.equals(userMap.get("password").toString())) {
                 return config.getHandler("SUCCESS");
             } else {
