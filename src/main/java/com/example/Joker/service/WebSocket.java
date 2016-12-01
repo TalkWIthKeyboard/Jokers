@@ -37,13 +37,17 @@ public class WebSocket {
      */
     @OnOpen
     public void onOpen(Session session, EndpointConfig config) {
+        // 测试
+        String roomId = ((HttpSession) config.getUserProperties().get(HttpSession.class.getName())).getAttribute("roomId").toString();
+        System.out.println(roomId);
+
         this.httpSession = (HttpSession) config.getUserProperties().get(HttpSession.class.getName());
         this.session = session;
         webSocketSet.add(this);
         addOnlineCount();
 
         // 连接状态持久化保存(可能后面要改为redis)
-        String roomId = (String) this.httpSession.getAttribute("roomId");
+        roomId = (String) this.httpSession.getAttribute("roomId");
         System.out.println(roomId);
 //        DBObject user = (DBObject) this.httpSession.getAttribute("user");
 //        System.out.println("有新链接加入!当前在线人数为" + getOnlineCount());
