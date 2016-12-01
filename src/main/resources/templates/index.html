@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
 <head lang="en">
     <meta charset="UTF-8"/>
     <title></title>
+    <script src="http://libs.baidu.com/jquery/1.10.2/jquery.min.js"></script>
 </head>
 <body>
 
@@ -12,6 +13,9 @@ Welcome<br/>
 <button onclick="closeWebSocket()">Close</button>
 <div id="message"></div>
 
+<div class="userId" th:text="${userId}" style="display: none"></div>
+<div class="roomId" th:text="${roomId}" style="display: none"></div>
+
 </body>
 
 <script type="text/javascript">
@@ -19,7 +23,9 @@ Welcome<br/>
 
     //判断当前浏览器是否支持WebSocket
     if ('WebSocket' in window) {
-        websocket = new WebSocket("ws://115.159.35.33:8080/websocket");
+        var userId = $(".userId").html();
+        var roomId = $(".roomId").html();
+        websocket = new WebSocket("ws://115.159.35.33:8080/websocket/" + userId + '/' + roomId);
     }
     else {
         alert('Not support websocket')

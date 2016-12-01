@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpSession;
 import javax.websocket.*;
+import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.util.List;
@@ -16,7 +17,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * Created by CoderSong on 16/11/29.
  */
 
-@ServerEndpoint(value = "/websocket", configurator = GetHttpSessionConfigurator.class)
+@ServerEndpoint(value = "/websocket/{userId}/{roomId}", configurator = GetHttpSessionConfigurator.class)
 @Component
 public class WebSocket {
     // 连接数
@@ -27,32 +28,32 @@ public class WebSocket {
 
     private Session session;
 
-    private HttpSession httpSession;
+    private String userId;
+    private String roomId;
+
 
     /**
-     * WebSocket的连接
+     * WebSocket的建立连接
      *
      * @param session
-     * @param config
+     * @param userId
+     * @param roomId
      */
     @OnOpen
-    public void onOpen(Session session, EndpointConfig config) {
-        // 测试
-        String roomId = ((HttpSession) config.getUserProperties().get(HttpSession.class.getName())).getAttribute("roomId").toString();
-        System.out.println(roomId);
-
-        this.httpSession = (HttpSession) config.getUserProperties().get(HttpSession.class.getName());
+    public void onOpen(
+            Session session,
+            @PathParam("userId") String userId,
+            @PathParam("roomId") String roomId
+    ) {
+        this.userId = userId;
+        this.roomId = roomId;
         this.session = session;
         webSocketSet.add(this);
         addOnlineCount();
 
-        // 连接状态持久化保存(可能后面要改为redis)
-        roomId = (String) this.httpSession.getAttribute("roomId");
-        System.out.println(roomId);
-//        DBObject user = (DBObject) this.httpSession.getAttribute("user");
-//        System.out.println("有新链接加入!当前在线人数为" + getOnlineCount());
-//        System.out.println("新连接的用户ID为" + user.get("_id"));
-//        System.out.println("新连接的用户房间ID为" + this.httpSession.getAttribute("roomId"));
+        System.out.println("有新链接加入!当前在线人数为" + getOnlineCount());
+        System.out.println("新连接的用户ID为" + this.userId);
+        System.out.println("新连接的用户房间ID为" + this.roomId);
     }
 
 
@@ -82,15 +83,15 @@ public class WebSocket {
 
         // 客户端发送准备信息
         if (message.equals("userReady")) {
-            userReadyOrNot(this.httpSession.getAttribute("roomId").toString(), 1);
+            userReadyOrNot(this.roomId, 1);
             // 通知所有人他准备了（测试用）
             for (WebSocket item : webSocketSet) {
-                DBObject user = (DBObject) item.httpSession.getAttribute("user");
-                String room = item.httpSession.getAttribute("roomId").toString();
-                item.sendMessage("用户 " + user.get("_id") + "在房间 " + room + "准备");
+                String thisUserId = item.userId;
+                String thisRoomId = item.roomId;
+                item.sendMessage("用户 " + thisUserId + "在房间 " + thisRoomId + "准备");
             }
             // 如果3个人都准备了就发牌开始
-            if (readyNumber(this.httpSession.getAttribute("roomId").toString()) == 3) {
+            if (readyNumber(this.roomId) == 3) {
                 // 发牌
                 Sands sand = new Sands();
                 sand.addPokers();
@@ -99,15 +100,15 @@ public class WebSocket {
 
                 // 领牌
                 for (WebSocket item : webSocketSet) {
-                    DBObject user = (DBObject) item.httpSession.getAttribute("user");
-                    String roomId = item.httpSession.getAttribute("roomId").toString();
-                    List<Poker> userPokers = players.get(sendPoker(user.get("_id").toString(), roomId));
+                    String userId = item.userId;
+                    String roomId = item.roomId;
+                    List<Poker> userPokers = players.get(sendPoker(userId, roomId));
                     item.sendMessage(printPokers(userPokers));
                 }
             }
         } else if (message.equals("userClearReady")) {
             // 取消准备
-            userReadyOrNot(this.httpSession.getAttribute("roomId").toString(), -1);
+            userReadyOrNot(this.roomId, -1);
         } else if (message.equals("playPocker")) {
             // 出牌
         }
@@ -186,7 +187,7 @@ public class WebSocket {
         String print = new String();
         for (int i = 0; i < userPokers.size(); i++) {
             print += config.getColorHandler().get(userPokers.get(i).getColor()) +
-                            config.getPointHandler().get(userPokers.get(i).getPoint()) + " ";
+                    config.getPointHandler().get(userPokers.get(i).getPoint()) + " ";
         }
         return print;
     }

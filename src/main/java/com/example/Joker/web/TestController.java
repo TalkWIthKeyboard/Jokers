@@ -1,6 +1,8 @@
 package com.example.Joker.web;
 
+import com.mongodb.DBObject;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -16,9 +18,14 @@ public class TestController {
 
     @RequestMapping("/")
     public String index(
-            HttpServletRequest request
+            HttpServletRequest request,
+            Model model
     ) {
-        Object session = request.getSession();
+        DBObject user = (DBObject) request.getSession().getAttribute("user");
+        String userId = user.get("_id").toString();
+        String roomId = (String) request.getSession().getAttribute("roomId");
+        model.addAttribute("userId", userId);
+        model.addAttribute("roomId", roomId);
         return "index";
     }
 }
