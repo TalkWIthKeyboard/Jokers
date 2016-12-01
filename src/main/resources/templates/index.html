@@ -25,7 +25,7 @@ Welcome<br/>
     if ('WebSocket' in window) {
         var userId = $(".userId").html();
         var roomId = $(".roomId").html();
-        websocket = new WebSocket("ws://localhost:8080/websocket/" + userId + '/' + roomId);
+        websocket = new WebSocket("ws://115.159.35.33:8080/websocket/" + userId + '/' + roomId);
     }
     else {
         alert('Not support websocket')
