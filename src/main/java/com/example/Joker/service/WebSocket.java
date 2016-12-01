@@ -269,9 +269,9 @@ public class WebSocket {
         if (robNumber > (Integer) roomObj.get("landlordScore")) {
             roomObj.put("landlordUserId", userId);
             roomObj.put("landlordScore", robNumber);
-            roomObj.put("rodNumber", (Integer) roomObj.get("rodNumber") + 1);
-            roomdb.updateInfo(roomId, roomObj);
         }
+        roomObj.put("rodNumber", (Integer) roomObj.get("rodNumber") + 1);
+        roomdb.updateInfo(roomId, roomObj);
 
         if (robNumber == 3 || (Integer) roomObj.get("rodNumber") == 3) {
             for (WebSocket item : webSocketSet) {
