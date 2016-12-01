@@ -105,8 +105,8 @@ public class WebSocket {
                 for (WebSocket item : webSocketSet) {
                     String userId = item.userId;
                     String roomId = item.roomId;
-                    this.userPokers = players.get(sendPoker(userId, roomId));
-                    item.sendMessage(printPokers(this.userPokers));
+                    item.userPokers = players.get(sendPoker(userId, roomId));
+                    item.sendMessage(printPokers(item.userPokers));
                 }
             }
         } else if (message.equals("userClearReady")) {
