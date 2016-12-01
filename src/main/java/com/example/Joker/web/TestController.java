@@ -16,7 +16,7 @@ import java.util.Objects;
 @Controller
 public class TestController {
 
-    @RequestMapping("/")
+    @RequestMapping("/test")
     public String index(
             HttpServletRequest request,
             Model model
