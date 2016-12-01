@@ -52,6 +52,9 @@ public class RoomController {
         room.put("key", roomForm.key);
         room.put("userList", userList);
         room.put("readyNum",0);
+        room.put("landlordScore", 0);
+        room.put("landlordUserId", null);
+        room.put("rodNumber", 0);
         String roomId = roomdb.saveData(room);
         if (roomId.equals("error")) {
             return config.getHandler("DB_SAVE_ERROR");

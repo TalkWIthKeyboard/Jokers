@@ -16,6 +16,9 @@ public class Room {
     private Integer isPrivate;
     private String key;
     private Integer readyNum;
+    private String landlordUserId;
+    private Integer landlordScore;
+    private Integer rodNumber;
     private Date createDate;
     private Date updateDate;
 
@@ -32,6 +35,9 @@ public class Room {
         this.isPrivate = isPrivate;
         this.key = key;
         this.readyNum = 0;
+        this.landlordScore = 0;
+        this.landlordUserId = null;
+        this.rodNumber = 0;
         this.createDate = createDate;
         this.updateDate = updateDate;
     }
@@ -84,5 +90,30 @@ public class Room {
     public void setReadyNum(Integer readyNum) {
         this.readyNum = readyNum;
     }
+
+    public Integer getRodNumber() {
+        return rodNumber;
+    }
+
+    public void setRodNumber(Integer rodNumber) {
+        this.rodNumber = rodNumber;
+    }
+
+    public String getLandlordUserId() {
+        return landlordUserId;
+    }
+
+    public void setLandlordUserId(String landlordUserId) {
+        this.landlordUserId = landlordUserId;
+    }
+
+    public Integer getLandlordScore() {
+        return landlordScore;
+    }
+
+    public void setLandlordScore(Integer landlordScore) {
+        this.landlordScore = landlordScore;
+    }
+
 }
 

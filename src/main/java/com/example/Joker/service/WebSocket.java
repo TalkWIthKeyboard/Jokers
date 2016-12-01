@@ -29,7 +29,6 @@ public class WebSocket {
     private static CopyOnWriteArraySet<WebSocket> webSocketSet = new CopyOnWriteArraySet<>();
 
     private Session session;
-
     private String userId;
     private String roomId;
 
@@ -124,7 +123,7 @@ public class WebSocket {
             if (playPokersMatcher.matches()) {
                 playPoker(message);
             } else if (robMatcher.matches()) {
-                robLandlord(message);
+                robLandlord(message, this.roomId, this.userId);
             } else {
 
             }
@@ -261,14 +260,25 @@ public class WebSocket {
      * @param message
      * @throws IOException
      */
-    public void robLandlord(String message) throws IOException {
+    public void robLandlord(String message, String roomId, String userId) throws IOException {
         // 对前端的抢地主请求进行转换
         Integer robNumber = Integer.parseInt(message.split(" ")[1]);
 
-        if (robNumber == 3) {
+        RoomDBService roomdb = new RoomDBService();
+        DBObject roomObj = roomdb.findById(roomId);
+        if (robNumber > (Integer) roomObj.get("landlordScore")) {
+            roomObj.put("landlordUserId", userId);
+            roomObj.put("landlordScore", robNumber);
+            roomObj.put("rodNumber", (Integer) roomObj.get("rodNumber") + 1);
+            roomdb.updateInfo(roomId, roomObj);
+        }
+
+        if (robNumber == 3 || (Integer) roomObj.get("rodNumber") == 3) {
             for (WebSocket item : webSocketSet) {
-                String userId = item.userId;
-                item.sendMessage("玩家 " + userId + "抢到了地主");
+                String itemRoomId = item.roomId;
+                if (itemRoomId.equals(roomId)){
+                    item.sendMessage("玩家 " + roomObj.get("landlordUserId") + "抢到了地主");
+                }
             }
         }
     }
