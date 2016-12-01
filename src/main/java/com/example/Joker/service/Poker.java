@@ -28,4 +28,5 @@ public class Poker {
     public void setColor(Integer color) {
         this.color = color;
     }
+
 }

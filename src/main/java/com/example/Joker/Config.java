@@ -19,8 +19,12 @@ public class Config {
     private List<ErrorHandler> errorHandler;
     // 花色处理器
     private Map<Integer, String> colorHandler;
+    // 反花色处理器
+    private Map<String, Integer> reColorHandler;
     // 点数处理器
     private Map<Integer, String> pointHandler;
+    // 反点数处理器
+    private Map<String, Integer> rePointHandler;
 
 
     public Config() {
@@ -65,6 +69,14 @@ public class Config {
         color.put(4, "spades"); // 黑桃
         this.colorHandler = color;
 
+        // 初始化反花色处理器
+        Map<String, Integer> reColor = new HashMap<>();
+        reColor.put("clubs", 1);
+        reColor.put("diamonds", 2);
+        reColor.put("hearts", 3);
+        reColor.put("spades", 4);
+        this.reColorHandler = reColor;
+
         // 初始化点数处理器
         Map<Integer, String> point = new HashMap<>();
         point.put(3, "3");
@@ -83,6 +95,26 @@ public class Config {
         point.put(16, "sk"); // 小王
         point.put(17, "bk"); // 大王
         this.pointHandler = point;
+
+
+        // 初始化反点数处理器
+        Map<String, Integer> rePoint = new HashMap<>();
+        rePoint.put("3", 3);
+        rePoint.put("4", 4);
+        rePoint.put("5", 5);
+        rePoint.put("6", 6);
+        rePoint.put("7", 7);
+        rePoint.put("8", 8);
+        rePoint.put("9", 9);
+        rePoint.put("10", 10);
+        rePoint.put("J", 11);
+        rePoint.put("Q", 12);
+        rePoint.put("K", 13);
+        rePoint.put("A", 14);
+        rePoint.put("2", 15);
+        rePoint.put("sk", 16); // 小王
+        rePoint.put("bk", 17); // 大王
+        this.rePointHandler = rePoint;
     }
 
     public ErrorHandler getHandler(String key) {
@@ -121,5 +153,11 @@ public class Config {
         return pointHandler;
     }
 
+    public Map<String, Integer> getReColorHandler() {
+        return reColorHandler;
+    }
 
+    public Map<String, Integer> getRePointHandler() {
+        return rePointHandler;
+    }
 }

@@ -5,13 +5,15 @@ import com.example.Joker.domain.RoomDBService;
 import com.mongodb.DBObject;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.HttpSession;
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by CoderSong on 16/11/29.
@@ -31,6 +33,7 @@ public class WebSocket {
     private String userId;
     private String roomId;
 
+    private List<Poker> userPokers;
 
     /**
      * WebSocket的建立连接
@@ -91,7 +94,7 @@ public class WebSocket {
                 item.sendMessage("用户 " + thisUserId + "在房间 " + thisRoomId + "准备");
             }
             // 如果3个人都准备了就发牌开始
-            if (readyNumber(this.roomId) == 3) {
+            if (readyNumber(this.roomId) == 1) {
                 // 发牌
                 Sands sand = new Sands();
                 sand.addPokers();
@@ -102,15 +105,20 @@ public class WebSocket {
                 for (WebSocket item : webSocketSet) {
                     String userId = item.userId;
                     String roomId = item.roomId;
-                    List<Poker> userPokers = players.get(sendPoker(userId, roomId));
-                    item.sendMessage(printPokers(userPokers));
+                    this.userPokers = players.get(sendPoker(userId, roomId));
+                    item.sendMessage(printPokers(this.userPokers));
                 }
             }
         } else if (message.equals("userClearReady")) {
             // 取消准备
             userReadyOrNot(this.roomId, -1);
-        } else if (message.equals("playPocker")) {
+        } else {
+            Pattern pattern = Pattern.compile("^playPokers.*");
+            Matcher playPokersMatcher = pattern.matcher(message);
             // 出牌
+            if (playPokersMatcher.matches()) {
+                playPoker(message);
+            }
         }
     }
 
@@ -190,5 +198,46 @@ public class WebSocket {
                     config.getPointHandler().get(userPokers.get(i).getPoint()) + " ";
         }
         return print;
+    }
+
+
+    /**
+     * 处理客户端的出牌消息
+     *
+     * @param message
+     */
+    public void playPoker(String message) throws IOException {
+        // 对前端的出牌请求进行转换
+        String pokers = message.split(" ")[1];
+        String[] pokerList = pokers.split(",");
+        List<Poker> pokerObjList = new ArrayList<>();
+        Config config = new Config();
+        for (int i = 0; i < pokerList.length; i++) {
+            String[] poker = pokerList[i].split("/");
+            Poker pokerObj = new Poker(
+                    config.getRePointHandler().get(poker[1]),
+                    config.getReColorHandler().get(poker[0])
+            );
+            pokerObjList.add(pokerObj);
+        }
+
+        // 后端同步出牌操作
+        for (int i = 0; i < pokerObjList.size(); i++) {
+            for (int j = 0; j < this.userPokers.size(); j++) {
+                if (pokerObjList.get(i).getColor() == this.userPokers.get(j).getColor() &&
+                        pokerObjList.get(i).getPoint() == this.userPokers.get(j).getPoint()) {
+                    this.userPokers.remove(j);
+                    break;
+                }
+            }
+        }
+
+        if (this.userPokers.size() > 0) {
+            // 给前端发消息
+            this.sendMessage(printPokers(this.userPokers));
+        } else {
+            // 牌出完了,游戏结束
+            this.sendMessage("game over!");
+        }
     }
 }

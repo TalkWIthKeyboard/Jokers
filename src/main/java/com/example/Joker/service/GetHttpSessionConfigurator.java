@@ -7,6 +7,7 @@ import javax.websocket.server.ServerEndpointConfig;
 
 /**
  * Created by CoderSong on 16/11/30.
+ * 这个类先不使用了，用url参数传值得方式替代
  */
 
 /**
