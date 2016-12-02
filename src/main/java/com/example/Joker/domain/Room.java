@@ -19,6 +19,7 @@ public class Room {
     private String landlordUserId;
     private Integer landlordScore;
     private Integer rodNumber;
+    private Integer state;
     private Date createDate;
     private Date updateDate;
 

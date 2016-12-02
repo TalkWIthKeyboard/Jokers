@@ -25,6 +25,8 @@ public class Config {
     private Map<Integer, String> pointHandler;
     // 反点数处理器
     private Map<String, Integer> rePointHandler;
+    // 房间状态处理器
+    private Map<Integer, String> roomStateHandler;
 
 
     public Config() {
@@ -96,7 +98,6 @@ public class Config {
         point.put(17, "bk"); // 大王
         this.pointHandler = point;
 
-
         // 初始化反点数处理器
         Map<String, Integer> rePoint = new HashMap<>();
         rePoint.put("3", 3);
@@ -115,6 +116,14 @@ public class Config {
         rePoint.put("sk", 16); // 小王
         rePoint.put("bk", 17); // 大王
         this.rePointHandler = rePoint;
+
+        // 初始化房间状态处理器
+        Map<Integer, String> roomState = new HashMap<>();
+        roomState.put(1, "WaitPlayersReady");
+        roomState.put(2, "RobLandlord");
+        roomState.put(3, "PlayPokers");
+        roomState.put(4, "GameOver");
+        this.roomStateHandler = roomState;
     }
 
     public ErrorHandler getHandler(String key) {
@@ -159,5 +168,9 @@ public class Config {
 
     public Map<String, Integer> getRePointHandler() {
         return rePointHandler;
+    }
+
+    public Map<Integer, String> getRoomStateHandler() {
+        return roomStateHandler;
     }
 }

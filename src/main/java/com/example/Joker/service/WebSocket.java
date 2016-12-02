@@ -2,6 +2,7 @@ package com.example.Joker.service;
 
 import com.example.Joker.Config;
 import com.example.Joker.domain.RoomDBService;
+import com.example.Joker.domain.UserDBService;
 import com.mongodb.DBObject;
 import org.springframework.stereotype.Component;
 
@@ -92,26 +93,14 @@ public class WebSocket {
             }
             // 如果3个人都准备了就发牌开始
             if (readyNumber(this.roomId) == 1) {
-                // 发牌
-                Sands sand = new Sands();
-                sand.addPokers();
-                sand.washPokers();
-                List<List<Poker>> players = sand.getPlayers();
-
-                // 领牌
-                for (WebSocket item : webSocketSet) {
-                    String userId = item.userId;
-                    String roomId = item.roomId;
-                    item.userPokers = players.get(sendPoker(userId, roomId));
-                    item.sendMessage(printPokers(item.userPokers));
-                }
+                afterAllReady(this.roomId);
             }
         } else if (message.equals("userClearReady")) {
             // 取消准备
             userReadyOrNot(this.roomId, -1);
         } else if (message.equals("gameOver")) {
             // 游戏结束
-            finishGame();
+            finishGame(this.roomId, this.userId);
         } else {
             Pattern playPokersPattern = Pattern.compile("^playPokers.*");
             Matcher playPokersMatcher = playPokersPattern.matcher(message);
@@ -119,7 +108,7 @@ public class WebSocket {
             Matcher robMatcher = robPattern.matcher(message);
             // 出牌
             if (playPokersMatcher.matches()) {
-                playPoker(message, this.userId);
+                playPoker(message, this.userId, this.roomId);
             } else if (robMatcher.matches()) {
                 robLandlord(message, this.roomId, this.userId);
             } else {
@@ -150,6 +139,7 @@ public class WebSocket {
         WebSocket.onlineCount--;
     }
 
+
     /**
      * 用户准备和取消准备动作
      *
@@ -164,7 +154,6 @@ public class WebSocket {
         roomdb.updateInfo(roomId, room);
     }
 
-
     /**
      * 获取房间准备人数
      *
@@ -176,6 +165,34 @@ public class WebSocket {
         DBObject room = roomdb.findById(roomId);
         Integer readyNum = (Integer) room.get("readyNum");
         return readyNum;
+    }
+
+
+    /**
+     * 所有人都准备了的后置动作
+     *
+     * @throws IOException
+     */
+    public void afterAllReady(String roomId) throws IOException {
+        // 修改房间状态
+        RoomDBService roomdb = new RoomDBService();
+        DBObject room = roomdb.findById(roomId);
+        room.put("state", 2);
+        roomdb.updateInfo(roomId, room);
+
+        // 发牌
+        Sands sand = new Sands();
+        sand.addPokers();
+        sand.washPokers();
+        List<List<Poker>> players = sand.getPlayers();
+
+        // 领牌
+        for (WebSocket item : webSocketSet) {
+            String itemUserId = item.userId;
+            String itemRoomId = item.roomId;
+            item.userPokers = players.get(sendPoker(itemUserId, itemRoomId));
+            item.sendMessage(printPokers(item.userPokers));
+        }
     }
 
     /**
@@ -212,7 +229,7 @@ public class WebSocket {
      *
      * @param message
      */
-    public void playPoker(String message, String userId) throws IOException {
+    public void playPoker(String message, String userId, String roomId) throws IOException {
         // 对前端的出牌请求进行转换
         String pokers = message.split(" ")[1];
         String[] pokerList = pokers.split(",");
@@ -238,15 +255,25 @@ public class WebSocket {
             }
         }
 
+        // 出的是炸弹，处理一下分数
+        if (isBoom(pokerObjList)) {
+            RoomDBService roomdb = new RoomDBService();
+            DBObject roomObj = roomdb.findById(roomId);
+            roomObj.put("landlordScore", (Integer) roomObj.get("landlordScore") * 2);
+            roomdb.updateInfo(roomId, roomObj);
+        }
+
         if (this.userPokers.size() > 0) {
             // 给前端发消息
             this.sendMessage("你现在手上还有" + printPokers(this.userPokers));
             for (WebSocket item : webSocketSet) {
-                item.sendMessage("玩家 " + userId + "出了" + printPokers(pokerObjList));
+                if (roomId.equals(item.roomId)) {
+                    item.sendMessage("玩家 " + userId + "出了" + printPokers(pokerObjList));
+                }
             }
         } else {
             // 牌出完了,游戏结束
-            finishGame();
+            finishGame(roomId, userId);
         }
     }
 
@@ -271,9 +298,13 @@ public class WebSocket {
         roomdb.updateInfo(roomId, roomObj);
 
         if (robNumber == 3 || (Integer) roomObj.get("rodNumber") == 3) {
+            // 修改房间状态
+            roomObj.put("state", 3);
+            roomdb.updateInfo(roomId, roomObj);
+
             for (WebSocket item : webSocketSet) {
                 String itemRoomId = item.roomId;
-                if (itemRoomId.equals(roomId)){
+                if (itemRoomId.equals(roomId)) {
                     item.sendMessage("玩家 " + roomObj.get("landlordUserId") + "抢到了地主");
                 }
             }
@@ -284,12 +315,78 @@ public class WebSocket {
     /**
      * 游戏结束
      */
-    public void finishGame() throws IOException {
-        for (WebSocket item : webSocketSet) {
-            String userId = item.userId;
-            item.sendMessage("玩家 " + userId + "赢了！");
+    public void finishGame(String roomId, String userId) throws IOException {
+        // 修改房间状态
+        RoomDBService roomdb = new RoomDBService();
+        DBObject room = roomdb.findById(roomId);
+        room.put("state", 4);
+        roomdb.updateInfo(roomId, room);
+
+        UserDBService userdb = new UserDBService();
+
+        // 构造通知信息，同步玩家数据库分数
+        List<String> userList = (List<String>) room.get("userList");
+        String message = new String();
+        Integer score = (Integer) room.get("rodNumber");
+        String landlordUserId = (String) room.get("landlordUserId");
+
+        for (int i = 0; i < userList.size(); i++) {
+            Integer thisScore = score;
+            // 这个人是地主
+            if (userList.get(i).equals(landlordUserId)) {
+                thisScore *= 2;
+            }
+
+            DBObject user = userdb.findById(userList.get(i));
+            // 这个人是赢家
+            if (userList.get(i).equals(userId)) {
+                message += userId + " win " + thisScore.toString() + " score/n";
+                user.put("score", (Integer) user.get("score") + thisScore);
+                userdb.updateInfo(userList.get(i), user);
+            } else {
+                // 这个人是输家
+                message += userList.get(i) + " lose " + thisScore.toString() + "score/n";
+                user.put("score", (Integer) user.get("score") - thisScore);
+                userdb.updateInfo(userList.get(i), user);
+            }
         }
 
-        // TODO 计算积分变化并修改
+        // 通知房间内的所有用户
+        for (WebSocket item : webSocketSet) {
+            String itemUserId = item.userId;
+            String itemRoomId = item.roomId;
+            if (this.roomId.equals(itemRoomId)) {
+                item.sendMessage("玩家 " + userId + "赢了!/n" + message);
+            }
+        }
+    }
+
+
+    /**
+     * 判断是不是炸弹
+     *
+     * @return
+     */
+    public static synchronized Boolean isBoom(List<Poker> pokers) {
+
+        if (pokers.size() != 4 && pokers.size() != 2) {
+            return false;
+        } else {
+            // 双王
+            if (pokers.size() == 2 && pokers.get(0).getPoint() + pokers.get(1).getPoint() == 33) {
+                return true;
+            } else if (pokers.size() == 4) {
+                // 普通炸弹
+                int point = pokers.get(0).getPoint();
+                for (int i = 1; i < pokers.size(); i++) {
+                    if (pokers.get(i).getPoint() != point) {
+                        return false;
+                    }
+                }
+                return true;
+            } else {
+                return false;
+            }
+        }
     }
 }
