@@ -56,9 +56,9 @@ public class PlayWebSocket {
         webSocketSet.add(this);
         addOnlineCount();
 
-        System.out.println("有新链接加入!当前在线人数为" + getOnlineCount());
-        System.out.println("新连接的用户ID为" + this.userId);
-        System.out.println("新连接的用户房间ID为" + this.roomId);
+        System.out.println("对战 有新链接加入!当前在线人数为" + getOnlineCount());
+        System.out.println("对战 新连接的用户ID为" + this.userId);
+        System.out.println("对战 新连接的用户房间ID为" + this.roomId);
     }
 
 
@@ -70,7 +70,7 @@ public class PlayWebSocket {
         webSocketSet.remove(this);
         subOnlineCount();
 
-        System.out.println("有一链接关闭!当前在线人数为" + getOnlineCount());
+        System.out.println("对战 有一链接关闭!当前在线人数为" + getOnlineCount());
     }
 
     /**
