@@ -7,6 +7,7 @@ import com.example.Joker.service.tool.ErrorHandler;
 import com.example.Joker.service.tool.Tool;
 import com.example.Joker.service.form.CreateRoomForm;
 import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
 import com.mongodb.DBObject;
 import org.springframework.web.bind.annotation.*;
 
@@ -51,11 +52,11 @@ public class RoomController {
         room.put("isPrivate", roomForm.isPrivate);
         room.put("key", roomForm.key);
         room.put("userList", userList);
-        room.put("readyNum",0);
+        room.put("readyNum", 0);
         room.put("landlordScore", 0);
         room.put("landlordUserId", null);
         room.put("rodNumber", 0);
-        room.put("state",1);
+        room.put("state", 1);
         String roomId = roomdb.saveData(room);
         if (roomId.equals("error")) {
             return config.getHandler("DB_SAVE_ERROR");
@@ -231,6 +232,23 @@ public class RoomController {
             }
         } else {
             return config.getHandler("ROOM_ERROR");
+        }
+    }
+
+    /**
+     * 获得所有房间的信息
+     *
+     * @return
+     */
+    @RequestMapping(value = "/all", method = RequestMethod.GET)
+    public ErrorHandler getAllRooms() {
+        List<DBObject> rooms = roomdb.findAll();
+        if (rooms != null) {
+            ErrorHandler success = config.getHandler("SUCCESS");
+            success.setParams(rooms);
+            return success;
+        } else {
+            return config.getHandler("INSIDE_ERROR");
         }
     }
 }

@@ -4,6 +4,7 @@ import com.mongodb.*;
 import org.bson.types.ObjectId;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by CoderSong on 16/11/24.
@@ -96,6 +97,26 @@ public class RoomDBService {
         } catch (Exception ex) {
             ex.printStackTrace();
             return "error";
+        }
+    }
+
+
+    /**
+     * 查找所有的房间信息
+     *
+     * @return
+     */
+    public List<DBObject> findAll() {
+        try {
+            List<DBObject> answer = this.room.find().toArray();
+            if (answer.size() > 0) {
+                return answer;
+            } else {
+                return null;
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
         }
     }
 }

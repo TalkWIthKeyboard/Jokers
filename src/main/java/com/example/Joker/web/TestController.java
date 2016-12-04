@@ -17,18 +17,41 @@ import java.util.Objects;
 @Controller
 public class TestController {
 
-    @RequestMapping(value = "/test", method = RequestMethod.GET)
-    public String index(
+    /**
+     * 对战页面websocket测试
+     *
+     * @param request
+     * @param model
+     * @return
+     */
+    @RequestMapping(value = "/playTest", method = RequestMethod.GET)
+    public String playTest(
             HttpServletRequest request,
             Model model
     ) {
         DBObject user = (DBObject) request.getSession().getAttribute("user");
         String userId = user.get("_id").toString();
         String roomId = (String) request.getSession().getAttribute("roomId");
-        System.out.println("test " + userId);
-        System.out.println("test " + roomId);
         model.addAttribute("userId", userId);
         model.addAttribute("roomId", roomId);
-        return "index";
+        return "playIndex";
+    }
+
+    /**
+     * 房间页面websocket测试
+     *
+     * @param request
+     * @param model
+     * @return
+     */
+    @RequestMapping(value = "/roomTest", method = RequestMethod.GET)
+    public String roomTest(
+            HttpServletRequest request,
+            Model model
+    ) {
+        DBObject user = (DBObject) request.getSession().getAttribute("user");
+        String userId = user.get("_id").toString();
+        model.addAttribute("userId", userId);
+        return "roomIndex";
     }
 }

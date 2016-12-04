@@ -43,7 +43,8 @@ public class JokersApplication extends WebMvcConfigurerAdapter {
         List<String> urlPatterns = new ArrayList<String>();
         urlPatterns.add("/users/user/*");
         urlPatterns.add("/rooms/*");
-        urlPatterns.add("/test");
+        urlPatterns.add("/playTest");
+        urlPatterns.add("/roomTest");
         registrationBean.setUrlPatterns(urlPatterns);
 
         return registrationBean;

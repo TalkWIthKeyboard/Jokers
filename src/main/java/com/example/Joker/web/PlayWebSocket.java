@@ -1,8 +1,10 @@
-package com.example.Joker.service;
+package com.example.Joker.web;
 
 import com.example.Joker.Config;
 import com.example.Joker.domain.RoomDBService;
 import com.example.Joker.domain.UserDBService;
+import com.example.Joker.service.Poker;
+import com.example.Joker.service.Sands;
 import com.mongodb.DBObject;
 import org.springframework.stereotype.Component;
 
@@ -20,14 +22,14 @@ import java.util.regex.Pattern;
  * Created by CoderSong on 16/11/29.
  */
 
-@ServerEndpoint(value = "/websocket/{userId}/{roomId}", configurator = GetHttpSessionConfigurator.class)
+@ServerEndpoint(value = "/PlayWebsocket/{userId}/{roomId}")
 @Component
-public class WebSocket {
+public class PlayWebSocket {
     // 连接数
     private static int onlineCount = 0;
 
     // WebSocket的连接池
-    private static CopyOnWriteArraySet<WebSocket> webSocketSet = new CopyOnWriteArraySet<>();
+    private static CopyOnWriteArraySet<PlayWebSocket> webSocketSet = new CopyOnWriteArraySet<>();
 
     private Session session;
     private String userId;
@@ -69,7 +71,6 @@ public class WebSocket {
         subOnlineCount();
 
         System.out.println("有一链接关闭!当前在线人数为" + getOnlineCount());
-
     }
 
     /**
@@ -88,7 +89,7 @@ public class WebSocket {
         if (message.equals("userReady")) {
             userReadyOrNot(this.roomId, 1);
             // 通知所有人他准备了（测试用）
-            for (WebSocket item : webSocketSet) {
+            for (PlayWebSocket item : webSocketSet) {
                 item.sendMessage("用户 " + this.userId + "在房间 " + this.roomId + "准备");
             }
             // 如果3个人都准备了就发牌开始
@@ -128,15 +129,15 @@ public class WebSocket {
     }
 
     public static synchronized int getOnlineCount() {
-        return WebSocket.onlineCount;
+        return PlayWebSocket.onlineCount;
     }
 
     public static synchronized void addOnlineCount() {
-        WebSocket.onlineCount++;
+        PlayWebSocket.onlineCount++;
     }
 
     public static synchronized void subOnlineCount() {
-        WebSocket.onlineCount--;
+        PlayWebSocket.onlineCount--;
     }
 
 
@@ -187,7 +188,7 @@ public class WebSocket {
         List<List<Poker>> players = sand.getPlayers();
 
         // 领牌
-        for (WebSocket item : webSocketSet) {
+        for (PlayWebSocket item : webSocketSet) {
             String itemUserId = item.userId;
             String itemRoomId = item.roomId;
             item.userPokers = players.get(sendPoker(itemUserId, itemRoomId));
@@ -266,7 +267,7 @@ public class WebSocket {
         if (this.userPokers.size() > 0) {
             // 给前端发消息
             this.sendMessage("你现在手上还有" + printPokers(this.userPokers));
-            for (WebSocket item : webSocketSet) {
+            for (PlayWebSocket item : webSocketSet) {
                 if (roomId.equals(item.roomId)) {
                     item.sendMessage("玩家 " + userId + "出了" + printPokers(pokerObjList));
                 }
@@ -302,9 +303,8 @@ public class WebSocket {
             roomObj.put("state", 3);
             roomdb.updateInfo(roomId, roomObj);
 
-            for (WebSocket item : webSocketSet) {
-                String itemRoomId = item.roomId;
-                if (itemRoomId.equals(roomId)) {
+            for (PlayWebSocket item : webSocketSet) {
+                if (item.roomId.equals(roomId)) {
                     item.sendMessage("玩家 " + roomObj.get("landlordUserId") + "抢到了地主");
                 }
             }
@@ -352,10 +352,8 @@ public class WebSocket {
         }
 
         // 通知房间内的所有用户
-        for (WebSocket item : webSocketSet) {
-            String itemUserId = item.userId;
-            String itemRoomId = item.roomId;
-            if (this.roomId.equals(itemRoomId)) {
+        for (PlayWebSocket item : webSocketSet) {
+            if (this.roomId.equals(item.roomId)) {
                 item.sendMessage("玩家 " + userId + "赢了!/n" + message);
             }
         }
