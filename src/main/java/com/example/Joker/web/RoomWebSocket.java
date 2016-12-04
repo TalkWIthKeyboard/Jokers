@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
  * Created by CoderSong on 16/12/3.
  */
 
-@ServerEndpoint(value = "/RoomWebsocket/{userId}")
+@ServerEndpoint(value = "/RoomWebsocket/{userId}/{roomId}")
 @Component
 public class RoomWebSocket {
     // 连接数
@@ -38,12 +38,23 @@ public class RoomWebSocket {
     @OnOpen
     public void onOpen(
             Session session,
-            @PathParam("userId") String userId
-    ) {
+            @PathParam("userId") String userId,
+            // 从哪个房间退出来的
+            @PathParam("roomId") String roomId
+    ) throws IOException {
         this.userId = userId;
         this.session = session;
         webSocketSet.add(this);
         addOnlineCount();
+
+        // 广播这个用户刚才的退出动作
+        if (!roomId.equals("null")) {
+            for (RoomWebSocket item : webSocketSet) {
+                if (!item.userId.equals(userId)) {
+                    item.sendMessage("用户 " + userId + " 退出了 " + roomId);
+                }
+            }
+        }
 
         System.out.println("房间 有新链接加入!当前在线人数为" + getOnlineCount());
         System.out.println("房间 新连接的用户ID为" + this.userId);

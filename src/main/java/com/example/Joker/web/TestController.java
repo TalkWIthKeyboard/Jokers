@@ -6,6 +6,7 @@ import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Objects;
@@ -46,12 +47,14 @@ public class TestController {
      */
     @RequestMapping(value = "/roomTest", method = RequestMethod.GET)
     public String roomTest(
+            @RequestParam(value = "roomId", required = true) String roomId,
             HttpServletRequest request,
             Model model
     ) {
         DBObject user = (DBObject) request.getSession().getAttribute("user");
         String userId = user.get("_id").toString();
         model.addAttribute("userId", userId);
+        model.addAttribute("roomId", roomId);
         return "roomIndex";
     }
 }

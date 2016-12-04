@@ -9,7 +9,8 @@ $(function () {
     //判断当前浏览器是否支持WebSocket
     if ('WebSocket' in window) {
         var userId = $(".userId").html();
-        websocket = new WebSocket("ws://localhost:8080/RoomWebsocket/" + userId);
+        var roomId = $('.roomId').html();
+        websocket = new WebSocket("ws://localhost:8080/RoomWebsocket/" + userId + "/" + roomId);
     }
     else {
         alert('Not support websocket')
@@ -22,7 +23,7 @@ $(function () {
 
     // close点击函数
     $('#close').click(function () {
-       closeWebSocket();
+        closeWebSocket();
     });
 
     //连接发生错误的回调方法

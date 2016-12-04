@@ -64,7 +64,8 @@ playTest<br/>
     //关闭连接
     function closeWebSocket() {
         websocket.close();
-        window.location.href = "/roomTest";
+        var url = "/roomTest/?roomId=" + roomId;
+        window.location.href = url;
     }
 
     //发送消息
