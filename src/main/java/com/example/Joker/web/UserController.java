@@ -118,7 +118,9 @@ public class UserController {
             // 登录后存入session
             request.getSession().setAttribute("user", user);
             if (pwdMd5.equals(userMap.get("password").toString())) {
-                return config.getHandler("SUCCESS");
+                ErrorHandler success = config.getHandler("SUCCESS");
+                success.setParams(user.get("_id").toString());
+                return success;
             } else {
                 return config.getHandler("PWD_ERROR");
             }
@@ -130,22 +132,22 @@ public class UserController {
     /**
      * 修改用户信息
      *
-     * @param id
      * @param changeUserForm
      * @return
      */
     @RequestMapping(value = "/user", method = RequestMethod.PUT)
     public ErrorHandler changeInfo(
-            @RequestParam(value = "id", required = true) String id,
-            @RequestBody User changeUserForm
+            @RequestBody User changeUserForm,
+            javax.servlet.http.HttpServletRequest request
     ) {
-        DBObject user = userdb.findById(id);
+        DBObject user = (DBObject) request.getSession().getAttribute("user");
+        String userId = user.get("_id").toString();
         if (user != null) {
             user.put("username", changeUserForm.getUsername());
             user.put("image", changeUserForm.getImage());
             user.put("score", changeUserForm.getScore());
             user.put("sex", changeUserForm.getSex());
-            String error = userdb.updateInfo(id, user);
+            String error = userdb.updateInfo(userId, user);
             if (error == null) {
                 return config.getHandler("SUCCESS");
             } else {

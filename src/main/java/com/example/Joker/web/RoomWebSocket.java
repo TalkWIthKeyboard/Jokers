@@ -51,7 +51,7 @@ public class RoomWebSocket {
         if (!roomId.equals("null")) {
             for (RoomWebSocket item : webSocketSet) {
                 if (!item.userId.equals(userId)) {
-                    item.sendMessage("用户 " + userId + " 退出了 " + roomId);
+                    item.sendMessage("exitRoom " + userId + "," + roomId);
                 }
             }
         }
@@ -87,12 +87,16 @@ public class RoomWebSocket {
         Matcher enterRoomMatcher = enterRoomPattern.matcher(message);
         Pattern exitRoomPattern = Pattern.compile("^exitRoom.*");
         Matcher exitRoomMatcher = exitRoomPattern.matcher(message);
+        Pattern createRoomPattern = Pattern.compile("^create.*");
+        Matcher createRoomMatcher = createRoomPattern.matcher(message);
 
         // 客户端发送准备信息
         if (enterRoomMatcher.matches()) {
             afterEnterRoom(message, this.userId);
         } else if (exitRoomMatcher.matches()) {
             afterExitRoom(message, this.userId);
+        } else if (createRoomMatcher.matches()) {
+            afterCreateRoom(message, this.userId);
         }
     }
 
@@ -104,6 +108,23 @@ public class RoomWebSocket {
      */
     public void sendMessage(String message) throws IOException {
         this.session.getBasicRemote().sendText(message);
+    }
+
+    /**
+     * 创建房间的API回调后续操作
+     *
+     * @param message
+     * @throws IOException
+     */
+    public void afterCreateRoom(String message, String userId) throws IOException {
+        String roomId = message.split("")[1];
+        for (RoomWebSocket item : webSocketSet) {
+            if (item.userId.equals(userId)) {
+                item.sendMessage("success create room");
+            } else {
+                item.sendMessage("createRoom " + roomId);
+            }
+        }
     }
 
 
@@ -120,7 +141,7 @@ public class RoomWebSocket {
             if (item.userId.equals(userId)) {
                 item.sendMessage("success");
             } else {
-                item.sendMessage("用户 " + userId + " 加入了 " + roomId);
+                item.sendMessage("enterRoom " + userId + "," + roomId);
             }
         }
     }
@@ -136,7 +157,7 @@ public class RoomWebSocket {
         String roomId = message.split(" ")[1];
         for (RoomWebSocket item : webSocketSet) {
             if (!item.userId.equals(userId)) {
-                item.sendMessage("用户 " + userId + " 退出了 " + roomId);
+                item.sendMessage("exitRoom " + userId + "," + roomId);
             }
         }
     }
