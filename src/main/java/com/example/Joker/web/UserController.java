@@ -92,7 +92,9 @@ public class UserController {
         user.put("roomId", null);
         String error = userdb.saveData(user);
         if (error == null) {
-            return config.getHandler("SUCCESS");
+            ErrorHandler success = config.getHandler("SUCCESS");
+            success.setParams(user.get("_id").toString());
+            return success;
         } else {
             return config.getHandler("DB_SAVE_ERROR");
         }

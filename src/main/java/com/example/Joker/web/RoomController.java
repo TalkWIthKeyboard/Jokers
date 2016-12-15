@@ -67,7 +67,9 @@ public class RoomController {
             user.put("roomId", roomId);
             String error = userdb.updateInfo(userid, user);
             if (error == null) {
-                return config.getHandler("SUCCESS");
+                ErrorHandler success = config.getHandler("SUCCESS");
+                success.setParams(room.get("_id").toString());
+                return success;
             } else {
                 return config.getHandler("DB_CHANGE_ERROR");
             }
