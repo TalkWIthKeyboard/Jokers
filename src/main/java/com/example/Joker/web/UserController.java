@@ -25,14 +25,13 @@ public class UserController {
     /**
      * 获取用户的基本信息
      *
-     * @param id
      * @return
      */
     @RequestMapping(value = "/user/userInfo", method = RequestMethod.GET)
     public ErrorHandler getUserInfo(
-            @RequestParam(value = "id", required = true) String id
+            HttpServletRequest request
     ) {
-        DBObject user = userdb.findById(id);
+        DBObject user = (DBObject) request.getSession().getAttribute("user");
         if (user != null) {
             ErrorHandler success = config.getHandler("SUCCESS");
             success.setParams(user);
