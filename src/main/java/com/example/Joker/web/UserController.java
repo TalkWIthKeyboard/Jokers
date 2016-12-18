@@ -44,22 +44,22 @@ public class UserController {
     /**
      * 用户修改密码
      *
-     * @param id
      * @param changePwdForm
      * @return
      */
     @RequestMapping(value = "/user/password", method = RequestMethod.PUT)
     public ErrorHandler changePassword(
-            @RequestParam(value = "id", required = true) String id,
-            @RequestBody ChangePwdForm changePwdForm
+            @RequestBody ChangePwdForm changePwdForm,
+            javax.servlet.http.HttpServletRequest request
     ) {
-        DBObject user = userdb.findById(id);
+        DBObject user = (DBObject) request.getSession().getAttribute("user");
+        String userId = user.get("_id").toString();
         if (user != null) {
             Map userMap = user.toMap();
             String pwdMd5 = tool.stringToMD5(changePwdForm.password);
             if (pwdMd5.equals(userMap.get("password").toString())) {
                 user.put("password", tool.stringToMD5(changePwdForm.rePassword));
-                String error = userdb.updateInfo(id, user);
+                String error = userdb.updateInfo(userId, user);
                 if (error == null) {
                     return config.getHandler("SUCCESS");
                 } else {
@@ -79,7 +79,7 @@ public class UserController {
      * @param UserForm
      * @return
      */
-    @RequestMapping(value = "/user", method = RequestMethod.POST)
+    @RequestMapping(value = "/register", method = RequestMethod.POST)
     public ErrorHandler saveUser(
             @RequestBody User UserForm
     ) {
