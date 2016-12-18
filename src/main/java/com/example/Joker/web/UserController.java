@@ -116,9 +116,12 @@ public class UserController {
         if (user != null) {
             Map userMap = user.toMap();
             String pwdMd5 = tool.stringToMD5(login.password);
-            // 登录后存入session
-            request.getSession().setAttribute("user", user);
             if (pwdMd5.equals(userMap.get("password").toString())) {
+                // 登录后存入session
+                request.getSession().setAttribute("user", user);
+                DBObject userSession = (DBObject) request.getSession().getAttribute("user");
+                String userId = userSession.get("_id").toString();
+                System.out.println("success load session userId: " + userId + " sessionId: " + request.getSession().getId());
                 ErrorHandler success = config.getHandler("SUCCESS");
                 success.setParams(user.get("_id").toString());
                 return success;
