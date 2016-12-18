@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import com.example.Joker.domain.UserDBService;
 import com.example.Joker.service.tool.Tool;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 
 @RestController
@@ -110,7 +112,8 @@ public class UserController {
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public ErrorHandler login(
             @RequestBody LoginForm login,
-            HttpServletRequest request
+            HttpServletRequest request,
+            HttpServletResponse response
     ) {
         DBObject user = userdb.findByAccount(login.account);
         if (user != null) {
@@ -118,10 +121,9 @@ public class UserController {
             String pwdMd5 = tool.stringToMD5(login.password);
             if (pwdMd5.equals(userMap.get("password").toString())) {
                 // 登录后存入session
-                request.getSession().setAttribute("user", user);
-                DBObject userSession = (DBObject) request.getSession().getAttribute("user");
-                String userId = userSession.get("_id").toString();
-                System.out.println("success load session userId: " + userId + " sessionId: " + request.getSession().getId());
+                request.getSession(true).setAttribute("user", user);
+                Cookie cookie = new Cookie("sessionId", request.getSession().getId());
+                response.addCookie(cookie);
                 ErrorHandler success = config.getHandler("SUCCESS");
                 success.setParams(user.get("_id").toString());
                 return success;
