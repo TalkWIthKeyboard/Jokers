@@ -1,6 +1,7 @@
 package com.example.Joker.domain;
 
 import com.mongodb.*;
+import com.mongodb.util.JSON;
 import org.bson.types.ObjectId;
 
 import java.util.Date;
@@ -80,6 +81,26 @@ public class UserDBService {
             Pattern pattern = Pattern.compile(".*" + username + ".*$", Pattern.CASE_INSENSITIVE);
             BasicDBObject basicObj = new BasicDBObject("account", pattern);
             List<DBObject> answer = this.user.find(basicObj).toArray();
+            if (answer.size() > 0) {
+                return answer;
+            } else {
+                return null;
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * 返回积分排名前6位
+     *
+     * @return
+     */
+    public List<DBObject> getTopUserScore() {
+        try {
+            DBObject sortFields = new BasicDBObject("score", -1);
+            List<DBObject> answer = this.user.find().sort(sortFields).limit(6).toArray();
             if (answer.size() > 0) {
                 return answer;
             } else {

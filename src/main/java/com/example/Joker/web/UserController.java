@@ -14,6 +14,7 @@ import com.example.Joker.service.tool.Tool;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -144,7 +145,7 @@ public class UserController {
     @RequestMapping(value = "/user", method = RequestMethod.PUT)
     public ErrorHandler changeInfo(
             @RequestBody User changeUserForm,
-            javax.servlet.http.HttpServletRequest request
+            HttpServletRequest request
     ) {
         DBObject user = (DBObject) request.getSession().getAttribute("user");
         String userId = user.get("_id").toString();
@@ -161,6 +162,24 @@ public class UserController {
             }
         } else {
             return config.getHandler("USER_ERROR");
+        }
+    }
+
+    /**
+     * 查询积分榜前6位
+     *
+     * @return
+     */
+    @RequestMapping(value = "/score/all", method = RequestMethod.GET)
+    public ErrorHandler getAllScore(
+    ) {
+        List<DBObject> userList = userdb.getTopUserScore();
+        if (userList != null) {
+            ErrorHandler success = config.getHandler("SUCCESS");
+            success.setParams(userList);
+            return success;
+        } else {
+            return config.getHandler("INSIDE_ERROR");
         }
     }
 }
