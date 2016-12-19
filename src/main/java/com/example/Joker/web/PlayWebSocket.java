@@ -288,18 +288,19 @@ public class PlayWebSocket {
      */
     public void robLandlord(String message, String roomId, String userId) throws IOException {
         // 对前端的抢地主请求进行转换
-        Integer robNumber = Integer.parseInt(message.split(" ")[1]);
+        Integer robScore = Integer.parseInt(message.split(" ")[1]);
 
         RoomDBService roomdb = new RoomDBService();
         DBObject roomObj = roomdb.findById(roomId);
-        if (robNumber > (Integer) roomObj.get("landlordScore")) {
+        if (robScore > (Integer) roomObj.get("landlordScore")) {
             roomObj.put("landlordUserId", userId);
-            roomObj.put("landlordScore", robNumber);
+            roomObj.put("landlordScore", robScore);
         }
         roomObj.put("rodNumber", (Integer) roomObj.get("rodNumber") + 1);
         roomdb.updateInfo(roomId, roomObj);
 
-        if (robNumber == 3 || (Integer) roomObj.get("rodNumber") == 3) {
+
+        if (robScore == 3 || (Integer) roomObj.get("rodNumber") == 3) {
             // 修改房间状态
             roomObj.put("state", 3);
             roomdb.updateInfo(roomId, roomObj);
@@ -307,6 +308,16 @@ public class PlayWebSocket {
             for (PlayWebSocket item : webSocketSet) {
                 if (item.roomId.equals(roomId)) {
                     item.sendMessage("robFinish " + roomObj.get("landlordUserId"));
+                }
+            }
+        } else {
+            for (PlayWebSocket item : webSocketSet) {
+                if (item.roomId.equals(roomId)) {
+                    if (!item.userId.equals(userId)) {
+                        item.sendMessage("robSuccess " + userId + "," + robScore.toString());
+                    } else {
+                        item.sendMessage("rob success");
+                    }
                 }
             }
         }

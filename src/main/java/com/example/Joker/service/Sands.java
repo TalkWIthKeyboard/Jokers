@@ -47,7 +47,7 @@ public class Sands {
      */
     public void washPokers(){
         Random ra = new Random();
-        for (int i = 0; i < this.pokers.size() - 1; i++) {
+        for (int i = 0; i < this.pokers.size(); i++) {
             int random = (int) ra.nextInt(4);
             while ((this.players.get(random).size() == 17 && random < 3)
                     || (this.players.get(random).size() == 3 && random == 3)) {
