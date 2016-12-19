@@ -19,9 +19,11 @@ public class Sands {
         List<Poker> playerOne = new ArrayList<>();
         List<Poker> playerTwo = new ArrayList<>();
         List<Poker> playerThree = new ArrayList<>();
+        List<Poker> lastCard = new ArrayList<>();
         players.add(playerOne);
         players.add(playerTwo);
         players.add(playerThree);
+        players.add(lastCard);
     }
 
     /**
@@ -45,10 +47,11 @@ public class Sands {
      */
     public void washPokers(){
         Random ra = new Random();
-        for (int i = 0; i < this.pokers.size() - 3; i++) {
-            int random = (int) ra.nextInt(3);
-            while (this.players.get(random).size() == 17) {
-                random = (int) ra.nextInt(3);
+        for (int i = 0; i < this.pokers.size() - 1; i++) {
+            int random = (int) ra.nextInt(4);
+            while ((this.players.get(random).size() == 17 && random < 3)
+                    || (this.players.get(random).size() == 3 && random == 3)) {
+                random = (int) ra.nextInt(4);
             }
 
             this.players.get(random).add(this.pokers.get(i));

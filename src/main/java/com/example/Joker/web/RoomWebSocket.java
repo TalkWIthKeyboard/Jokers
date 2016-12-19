@@ -139,7 +139,7 @@ public class RoomWebSocket {
         String roomId = message.split(" ")[1];
         for (RoomWebSocket item : webSocketSet) {
             if (item.userId.equals(userId)) {
-                item.sendMessage("success");
+                item.sendMessage("success enter room");
             } else {
                 item.sendMessage("enterRoom " + userId + "," + roomId);
             }

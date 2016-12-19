@@ -36,6 +36,7 @@ public class PlayWebSocket {
     private String roomId;
 
     private List<Poker> userPokers;
+    private List<Poker> lastCard;
 
     /**
      * WebSocket的建立连接
@@ -88,17 +89,15 @@ public class PlayWebSocket {
         // 客户端发送准备信息
         if (message.equals("userReady")) {
             userReadyOrNot(this.roomId, 1);
-            // 通知所有人他准备了（测试用）
-            for (PlayWebSocket item : webSocketSet) {
-                item.sendMessage("用户 " + this.userId + "在房间 " + this.roomId + "准备");
-            }
+            sendAllUserMessage("success ready", "userReady ", null);
             // 如果3个人都准备了就发牌开始
-            if (readyNumber(this.roomId) == 1) {
+            if (readyNumber(this.roomId) == 2) {
                 afterAllReady(this.roomId);
             }
         } else if (message.equals("userClearReady")) {
             // 取消准备
             userReadyOrNot(this.roomId, -1);
+            sendAllUserMessage("success clear ready", "userClearReady", null);
         } else if (message.equals("gameOver")) {
             // 游戏结束
             finishGame(this.roomId, this.userId);
@@ -192,7 +191,9 @@ public class PlayWebSocket {
             String itemUserId = item.userId;
             String itemRoomId = item.roomId;
             item.userPokers = players.get(sendPoker(itemUserId, itemRoomId));
-            item.sendMessage(printPokers(item.userPokers));
+            item.lastCard = players.get(3);
+            item.sendMessage("handPoker " + printPokers(item.userPokers));
+            item.sendMessage("lastCards " + printPokers(item.lastCard));
         }
     }
 
@@ -210,7 +211,7 @@ public class PlayWebSocket {
     }
 
     /**
-     * 把牌打印下来，（测试用）
+     * 把牌拼成字符串
      *
      * @param userPokers
      */
@@ -266,10 +267,10 @@ public class PlayWebSocket {
 
         if (this.userPokers.size() > 0) {
             // 给前端发消息
-            this.sendMessage("你现在手上还有" + printPokers(this.userPokers));
+            this.sendMessage("handPoker " + printPokers(this.userPokers));
             for (PlayWebSocket item : webSocketSet) {
                 if (roomId.equals(item.roomId)) {
-                    item.sendMessage("玩家 " + userId + "出了" + printPokers(pokerObjList));
+                    item.sendMessage("playerSendPoker " + userId + "," + printPokers(pokerObjList));
                 }
             }
         } else {
@@ -305,7 +306,7 @@ public class PlayWebSocket {
 
             for (PlayWebSocket item : webSocketSet) {
                 if (item.roomId.equals(roomId)) {
-                    item.sendMessage("玩家 " + roomObj.get("landlordUserId") + "抢到了地主");
+                    item.sendMessage("robFinish " + roomObj.get("landlordUserId"));
                 }
             }
         }
@@ -354,7 +355,7 @@ public class PlayWebSocket {
         // 通知房间内的所有用户
         for (PlayWebSocket item : webSocketSet) {
             if (this.roomId.equals(item.roomId)) {
-                item.sendMessage("玩家 " + userId + "赢了!/n" + message);
+                item.sendMessage("userWin " + userId + "," + message);
             }
         }
     }
@@ -384,6 +385,27 @@ public class PlayWebSocket {
                 return true;
             } else {
                 return false;
+            }
+        }
+    }
+
+    /**
+     * 通知房间内所有人
+     *
+     * @param sendSelf   通知自己的消息
+     * @param sendOthers 通知别人的消息头
+     * @throws IOException
+     */
+    public void sendAllUserMessage(String sendSelf, String sendOthers, String message) throws IOException {
+        for (PlayWebSocket item : webSocketSet) {
+            if (this.roomId.equals(item.roomId)) {
+                if (this.userId.equals(item.userId)) {
+                    // 对自己发消息
+                    item.sendMessage(sendSelf);
+                } else {
+                    // 对别人发消息
+                    item.sendMessage(sendOthers + this.userId + message);
+                }
             }
         }
     }

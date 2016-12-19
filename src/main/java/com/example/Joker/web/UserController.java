@@ -93,6 +93,7 @@ public class UserController {
         user.put("username", UserForm.getUsername());
         user.put("sex", UserForm.getSex());
         user.put("roomId", null);
+        user.put("score",10);
         String error = userdb.saveData(user);
         if (error == null) {
             ErrorHandler success = config.getHandler("SUCCESS");
