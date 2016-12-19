@@ -109,6 +109,10 @@ public class RoomDBService {
     public List<DBObject> findAll() {
         try {
             List<DBObject> answer = this.room.find().toArray();
+            for (int index = 0; index < answer.size(); index++){
+                answer.get(index).put("_id",answer.get(index).get("_id").toString());
+            }
+
             if (answer.size() > 0) {
                 return answer;
             } else {
