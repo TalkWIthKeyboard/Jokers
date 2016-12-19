@@ -125,6 +125,7 @@ public class UserController {
                 // 登录后存入session
                 request.getSession(true).setAttribute("user", user);
                 Cookie cookie = new Cookie("sessionId", request.getSession().getId());
+                cookie.setMaxAge(1200);
                 response.addCookie(cookie);
                 ErrorHandler success = config.getHandler("SUCCESS");
                 success.setParams(user.get("_id").toString());

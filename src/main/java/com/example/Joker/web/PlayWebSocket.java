@@ -3,6 +3,7 @@ package com.example.Joker.web;
 import com.example.Joker.Config;
 import com.example.Joker.domain.RoomDBService;
 import com.example.Joker.domain.UserDBService;
+import com.example.Joker.service.PockerComparator;
 import com.example.Joker.service.Poker;
 import com.example.Joker.service.Sands;
 import com.mongodb.DBObject;
@@ -13,6 +14,7 @@ import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.regex.Matcher;
@@ -91,7 +93,7 @@ public class PlayWebSocket {
             userReadyOrNot(this.roomId, 1);
             sendAllUserMessage("success ready", "userReady ", null);
             // 如果3个人都准备了就发牌开始
-            if (readyNumber(this.roomId) == 2) {
+            if (readyNumber(this.roomId) == 1) {
                 afterAllReady(this.roomId);
             }
         } else if (message.equals("userClearReady")) {
@@ -299,7 +301,7 @@ public class PlayWebSocket {
         roomObj.put("rodNumber", (Integer) roomObj.get("rodNumber") + 1);
         roomdb.updateInfo(roomId, roomObj);
 
-
+        // 这个人抢到地主了
         if (robScore == 3 || (Integer) roomObj.get("rodNumber") == 3) {
             // 修改房间状态
             roomObj.put("state", 3);
@@ -307,9 +309,17 @@ public class PlayWebSocket {
 
             for (PlayWebSocket item : webSocketSet) {
                 if (item.roomId.equals(roomId)) {
+                    // 把地主牌发给他
+                    if (item.userId.equals(roomObj.get("landlordUserId"))) {
+                        item.userPokers.addAll(item.lastCard);
+                        PockerComparator comparator = new PockerComparator();
+                        Collections.sort(item.userPokers,comparator);
+                        item.sendMessage("handPoker " + printPokers(item.userPokers));
+                    }
                     item.sendMessage("robFinish " + roomObj.get("landlordUserId"));
                 }
             }
+
         } else {
             for (PlayWebSocket item : webSocketSet) {
                 if (item.roomId.equals(roomId)) {
@@ -327,6 +337,7 @@ public class PlayWebSocket {
     /**
      * 游戏结束
      */
+
     public void finishGame(String roomId, String userId) throws IOException {
         // 修改房间状态
         RoomDBService roomdb = new RoomDBService();
