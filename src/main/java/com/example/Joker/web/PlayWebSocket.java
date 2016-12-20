@@ -93,7 +93,7 @@ public class PlayWebSocket {
             userReadyOrNot(this.roomId, 1);
             sendAllUserMessage("success ready", "userReady ", "");
             // 如果3个人都准备了就发牌开始
-            if (readyNumber(this.roomId) == 2) {
+            if (readyNumber(this.roomId) == 3) {
                 afterAllReady(this.roomId);
             }
         } else if (message.equals("userClearReady")) {
@@ -237,7 +237,7 @@ public class PlayWebSocket {
     public void messageToNext(String roomId) throws IOException {
         RoomDBService roomdb = new RoomDBService();
         DBObject room = roomdb.findById(roomId);
-        Integer playIndex = ((Integer) room.get("playIndex") + 1) % 2;
+        Integer playIndex = ((Integer) room.get("playIndex") + 1) % 3;
         String playUserId = (String) ((List) room.get("userList")).get(playIndex);
         for (PlayWebSocket item : webSocketSet) {
             if (playUserId.equals(item.userId)) {
@@ -399,12 +399,14 @@ public class PlayWebSocket {
             DBObject user = userdb.findById(userList.get(i));
             // 这个人是赢家
             if (userList.get(i).equals(userId)) {
-                message += userId + " win " + thisScore.toString() + " score/n";
+                DBObject userObj = userdb.findById(userId);
+                message += userObj.get("userName") + " win " + thisScore.toString() + " score,";
                 user.put("score", (Integer) user.get("score") + thisScore);
                 userdb.updateInfo(userList.get(i), user);
             } else {
                 // 这个人是输家
-                message += userList.get(i) + " lose " + thisScore.toString() + "score/n";
+                DBObject userObj = userdb.findById(userList.get(i));
+                message += userObj.get("userName") + " lose " + thisScore.toString() + "score,";
                 user.put("score", (Integer) user.get("score") - thisScore);
                 userdb.updateInfo(userList.get(i), user);
             }
