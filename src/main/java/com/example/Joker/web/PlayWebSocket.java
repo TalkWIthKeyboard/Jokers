@@ -229,6 +229,27 @@ public class PlayWebSocket {
 
 
     /**
+     * 通知下一个人出牌
+     *
+     * @param roomId
+     * @throws IOException
+     */
+    public void messageToNext(String roomId) throws IOException {
+        RoomDBService roomdb = new RoomDBService();
+        DBObject room = roomdb.findById(roomId);
+        Integer playIndex = ((Integer) room.get("playIndex") + 1) % 3;
+        String playUserId = (String) ((List) room.get("userList")).get(playIndex);
+        for (PlayWebSocket item : webSocketSet) {
+            if (playUserId.equals(item.userId)) {
+                item.sendMessage("readySendPocker");
+            }
+        }
+        room.put("playIndex", playIndex);
+        roomdb.updateInfo(roomId, room);
+    }
+
+
+    /**
      * 处理客户端的出牌消息
      *
      * @param message
@@ -239,6 +260,7 @@ public class PlayWebSocket {
         // 没有出牌
         if (pokers.equals("null")) {
             // 给前端发消息
+            messageToNext(roomId);
             this.sendMessage("handPoker " + printPokers(this.userPokers));
             for (PlayWebSocket item : webSocketSet) {
                 if (roomId.equals(item.roomId)) {
@@ -279,6 +301,7 @@ public class PlayWebSocket {
 
             if (this.userPokers.size() > 0) {
                 // 给前端发消息
+                messageToNext(roomId);
                 this.sendMessage("handPoker " + printPokers(this.userPokers));
                 for (PlayWebSocket item : webSocketSet) {
                     if (roomId.equals(item.roomId)) {
@@ -316,6 +339,7 @@ public class PlayWebSocket {
         if (robScore == 3 || (Integer) roomObj.get("rodNumber") == 3) {
             // 修改房间状态
             roomObj.put("state", 3);
+            roomObj.put("playIndex", ((List) roomObj.get("userList")).indexOf(this.userId));
             roomdb.updateInfo(roomId, roomObj);
 
             for (PlayWebSocket item : webSocketSet) {
@@ -324,7 +348,7 @@ public class PlayWebSocket {
                     if (item.userId.equals(roomObj.get("landlordUserId"))) {
                         item.userPokers.addAll(item.lastCard);
                         PockerComparator comparator = new PockerComparator();
-                        Collections.sort(item.userPokers,comparator);
+                        Collections.sort(item.userPokers, comparator);
                         item.sendMessage("handPoker " + printPokers(item.userPokers));
                     }
                     item.sendMessage("robFinish " + roomObj.get("landlordUserId"));

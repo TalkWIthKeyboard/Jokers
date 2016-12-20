@@ -57,6 +57,7 @@ public class RoomController {
         room.put("landlordScore", 0);
         room.put("landlordUserId", null);
         room.put("rodNumber", 0);
+        room.put("playIndex", -1);
         room.put("state", 1);
         String roomId = roomdb.saveData(room);
         if (roomId.equals("error")) {

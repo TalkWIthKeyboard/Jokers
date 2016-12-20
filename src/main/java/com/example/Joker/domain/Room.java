@@ -20,6 +20,7 @@ public class Room {
     private Integer landlordScore;
     private Integer rodNumber;
     private Integer state;
+    private Integer playIndex; // 现在该谁出牌
     private Date createDate;
     private Date updateDate;
 
