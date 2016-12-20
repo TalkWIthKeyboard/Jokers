@@ -114,9 +114,6 @@ public class RoomController {
                     if (error == null) {
                         // 同步session信息
                         request.getSession().setAttribute("roomId", id);
-                        // 输出测试
-                        String testRoomId = (String) request.getSession().getAttribute("roomId");
-                        System.out.println(testRoomId);
                         // 同步用户的房间信息
                         user.put("roomId", id);
                         String err = userdb.updateInfo(userid, user);

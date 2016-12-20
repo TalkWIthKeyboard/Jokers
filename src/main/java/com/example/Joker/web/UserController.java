@@ -125,6 +125,8 @@ public class UserController {
             if (pwdMd5.equals(userMap.get("password").toString())) {
                 // 登录后存入session
                 request.getSession(true).setAttribute("user", user);
+                System.out.println("userId: " + user.get("_id"));
+                System.out.println("sessionId: " + request.getSession().getId());
                 Cookie cookie = new Cookie("sessionId", request.getSession().getId());
                 cookie.setMaxAge(1200);
                 response.addCookie(cookie);
