@@ -32,9 +32,9 @@ public class UserController {
      */
     @RequestMapping(value = "/user/userInfo", method = RequestMethod.GET)
     public ErrorHandler getUserInfo(
-            HttpServletRequest request
+            @RequestParam(value = "userId", required = true) String id
     ) {
-        DBObject user = (DBObject) request.getSession().getAttribute("user");
+        DBObject user = userdb.findById(id);
         if (user != null) {
             ErrorHandler success = config.getHandler("SUCCESS");
             success.setParams(user);
@@ -52,10 +52,10 @@ public class UserController {
      */
     @RequestMapping(value = "/user/password", method = RequestMethod.PUT)
     public ErrorHandler changePassword(
-            @RequestBody ChangePwdForm changePwdForm,
-            javax.servlet.http.HttpServletRequest request
+            @RequestParam(value = "userId", required = true) String id,
+            @RequestBody ChangePwdForm changePwdForm
     ) {
-        DBObject user = (DBObject) request.getSession().getAttribute("user");
+        DBObject user = userdb.findById(id);
         String userId = user.get("_id").toString();
         if (user != null) {
             Map userMap = user.toMap();
@@ -124,12 +124,12 @@ public class UserController {
             String pwdMd5 = tool.stringToMD5(login.password);
             if (pwdMd5.equals(userMap.get("password").toString())) {
                 // 登录后存入session
-                request.getSession(true).setAttribute("user", user);
-                System.out.println("userId: " + user.get("_id"));
-                System.out.println("sessionId: " + request.getSession().getId());
-                Cookie cookie = new Cookie("sessionId", request.getSession().getId());
-                cookie.setMaxAge(1200);
-                response.addCookie(cookie);
+//                request.getSession(true).setAttribute("user", user);
+//                System.out.println("userId: " + user.get("_id"));
+//                System.out.println("sessionId: " + request.getSession().getId());
+//                Cookie cookie = new Cookie("sessionId", request.getSession().getId());
+//                cookie.setMaxAge(1200);
+//                response.addCookie(cookie);
                 ErrorHandler success = config.getHandler("SUCCESS");
                 success.setParams(user.get("_id").toString());
                 return success;
@@ -149,10 +149,10 @@ public class UserController {
      */
     @RequestMapping(value = "/user", method = RequestMethod.PUT)
     public ErrorHandler changeInfo(
-            @RequestBody User changeUserForm,
-            HttpServletRequest request
+            @RequestParam(value = "userId", required = true) String id,
+            @RequestBody User changeUserForm
     ) {
-        DBObject user = (DBObject) request.getSession().getAttribute("user");
+        DBObject user = userdb.findById(id);
         String userId = user.get("_id").toString();
         if (user != null) {
             user.put("username", changeUserForm.getUsername());

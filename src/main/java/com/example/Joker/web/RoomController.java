@@ -88,7 +88,7 @@ public class RoomController {
      */
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public ErrorHandler joinRoom(
-            @RequestParam(value = "id", required = true) String id,
+            @RequestParam(value = "roomId", required = true) String id,
             @RequestParam(value = "key", required = true) String key,
             HttpServletRequest request
     ) {
@@ -143,7 +143,7 @@ public class RoomController {
      */
     @RequestMapping(value = "/", method = RequestMethod.PUT)
     public ErrorHandler changeRoomPwd(
-            @RequestParam(value = "id", required = true) String id,
+            @RequestParam(value = "roomId", required = true) String id,
             @RequestBody CreateRoomForm roomForm,
             HttpServletRequest request
     ) {
@@ -185,7 +185,7 @@ public class RoomController {
      */
     @RequestMapping(value = "/userRoom", method = RequestMethod.GET)
     public ErrorHandler exitRoom(
-            @RequestParam(value = "id", required = true) String id,
+            @RequestParam(value = "roomId", required = true) String id,
             HttpServletRequest request
     ) {
         DBObject roomObj = roomdb.findById(id);
