@@ -38,6 +38,7 @@ public class RoomController {
     @RequestMapping(value = "/", method = RequestMethod.POST)
     public ErrorHandler createRoom(
             @RequestBody CreateRoomForm roomForm,
+            @RequestParam(value = "userId", required = true) String userId,
             HttpServletRequest request
     ) {
         DBObject room = new BasicDBObject();
@@ -45,11 +46,10 @@ public class RoomController {
             roomForm.key = tool.stringToMD5(roomForm.key);
         }
 
-        DBObject user = (DBObject) request.getSession().getAttribute("user");
+        DBObject user = userdb.findById(userId);
         // 修改房间信息
-        String userid = user.get("_id").toString();
         List<String> userList = new ArrayList<String>();
-        userList.add(userid);
+        userList.add(userId);
         room.put("isPrivate", roomForm.isPrivate);
         room.put("key", roomForm.key);
         room.put("userList", userList);
@@ -67,7 +67,7 @@ public class RoomController {
             request.getSession().setAttribute("roomId", roomId);
             // 同步修改用户的房间信息
             user.put("roomId", roomId);
-            String error = userdb.updateInfo(userid, user);
+            String error = userdb.updateInfo(userId, user);
             if (error == null) {
                 ErrorHandler success = config.getHandler("SUCCESS");
                 success.setParams(room.get("_id").toString());
@@ -88,6 +88,7 @@ public class RoomController {
      */
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public ErrorHandler joinRoom(
+            @RequestParam(value = "userId", required = true) String userId,
             @RequestParam(value = "roomId", required = true) String id,
             @RequestParam(value = "key", required = true) String key,
             HttpServletRequest request
@@ -106,9 +107,8 @@ public class RoomController {
                 if ((Integer) roomObj.get("isPrivate") == 1 && !key.equals((String) roomObj.get("key"))) {
                     return config.getHandler("ROOM_PWD_ERROR");
                 } else {
-                    DBObject user = (DBObject) request.getSession().getAttribute("user");
-                    String userid = user.get("_id").toString();
-                    userList.add(userid);
+                    DBObject user = userdb.findById(userId);
+                    userList.add(userId);
                     roomObj.put("userList", userList);
                     String error = roomdb.updateInfo(id, roomObj);
                     if (error == null) {
@@ -116,7 +116,7 @@ public class RoomController {
                         request.getSession().setAttribute("roomId", id);
                         // 同步用户的房间信息
                         user.put("roomId", id);
-                        String err = userdb.updateInfo(userid, user);
+                        String err = userdb.updateInfo(userId, user);
                         if (err == null) {
                             return config.getHandler("SUCCESS");
                         } else {
@@ -138,27 +138,24 @@ public class RoomController {
      *
      * @param id
      * @param roomForm
-     * @param request
      * @return
      */
     @RequestMapping(value = "/", method = RequestMethod.PUT)
     public ErrorHandler changeRoomPwd(
+            @RequestParam(value = "userId", required = true) String userId,
             @RequestParam(value = "roomId", required = true) String id,
-            @RequestBody CreateRoomForm roomForm,
-            HttpServletRequest request
+            @RequestBody CreateRoomForm roomForm
     ) {
         DBObject roomObj = roomdb.findById(id);
         if (roomObj != null) {
             List userList = (List) roomObj.get("userList");
-            DBObject user = (DBObject) request.getSession().getAttribute("user");
-            String userid = user.get("_id").toString();
             // 密码编码
             if (!roomForm.key.equals("")) {
                 roomForm.key = tool.stringToMD5(roomForm.key);
             }
 
             // 判断是否是房主
-            if (userList.get(0).equals(userid)) {
+            if (userList.get(0).equals(userId)) {
                 roomObj.put("isPrivate", roomForm.isPrivate);
                 roomObj.put("key", roomForm.key);
                 String error = roomdb.updateInfo(id, roomObj);
@@ -185,17 +182,17 @@ public class RoomController {
      */
     @RequestMapping(value = "/userRoom", method = RequestMethod.GET)
     public ErrorHandler exitRoom(
+            @RequestParam(value = "userId", required = true) String userId,
             @RequestParam(value = "roomId", required = true) String id,
             HttpServletRequest request
     ) {
         DBObject roomObj = roomdb.findById(id);
         if (roomObj != null) {
             List<String> userList = (List<String>) roomObj.get("userList");
-            DBObject user = (DBObject) request.getSession().getAttribute("user");
-            String userid = user.get("_id").toString();
+            DBObject user = userdb.findById(userId);
             int flag = -1;
             for (int index = 0; index < userList.size(); index++) {
-                if (userList.get(index).equals(userid)) {
+                if (userList.get(index).equals(userId)) {
                     flag = index;
                     break;
                 }

@@ -33,41 +33,41 @@ public class JokersApplication extends WebMvcConfigurerAdapter {
      *
      * @return
      */
-    @Bean
-    public FilterRegistrationBean filterRegistrationBean() {
-        FilterRegistrationBean registrationBean = new FilterRegistrationBean();
-
-        // 给/users/*路由注册登录检测过滤器
-        LoginCheckFilter loginCheckFilter = new LoginCheckFilter();
-        registrationBean.setFilter(loginCheckFilter);
-        List<String> urlPatterns = new ArrayList<String>();
-        urlPatterns.add("/users/user/*");
-        urlPatterns.add("/rooms/*");
-        urlPatterns.add("/playTest");
-        urlPatterns.add("/roomTest");
-        registrationBean.setUrlPatterns(urlPatterns);
-
-        return registrationBean;
-    }
+//    @Bean
+//    public FilterRegistrationBean filterRegistrationBean() {
+//        FilterRegistrationBean registrationBean = new FilterRegistrationBean();
+//
+//        // 给/users/*路由注册登录检测过滤器
+//        LoginCheckFilter loginCheckFilter = new LoginCheckFilter();
+//        registrationBean.setFilter(loginCheckFilter);
+//        List<String> urlPatterns = new ArrayList<String>();
+//        urlPatterns.add("/users/user/*");
+//        urlPatterns.add("/rooms/*");
+//        urlPatterns.add("/playTest");
+//        urlPatterns.add("/roomTest");
+//        registrationBean.setUrlPatterns(urlPatterns);
+//
+//        return registrationBean;
+//    }
 
     /**
      * 注册是否进入房间过滤器
      *
      * @return
      */
-    @Bean
-    public FilterRegistrationBean filterJoinRoomBean() {
-        FilterRegistrationBean joinRoomBean = new FilterRegistrationBean();
-
-        // 给/users/*路由注册登录检测过滤器
-        EnterRoomFilter enterRoomCheckFilter = new EnterRoomFilter();
-        joinRoomBean.setFilter(enterRoomCheckFilter);
-        List<String> urlPatterns = new ArrayList<String>();
-        urlPatterns.add("/test");
-        joinRoomBean.setUrlPatterns(urlPatterns);
-
-        return joinRoomBean;
-    }
+//    @Bean
+//    public FilterRegistrationBean filterJoinRoomBean() {
+//        FilterRegistrationBean joinRoomBean = new FilterRegistrationBean();
+//
+//        // 给/users/*路由注册登录检测过滤器
+//        EnterRoomFilter enterRoomCheckFilter = new EnterRoomFilter();
+//        joinRoomBean.setFilter(enterRoomCheckFilter);
+//        List<String> urlPatterns = new ArrayList<String>();
+//        urlPatterns.add("/test");
+//        joinRoomBean.setUrlPatterns(urlPatterns);
+//
+//        return joinRoomBean;
+//    }
 
     /**
      * 注册拦截链
