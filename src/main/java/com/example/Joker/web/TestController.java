@@ -28,11 +28,10 @@ public class TestController {
     @RequestMapping(value = "/playTest", method = RequestMethod.GET)
     public String playTest(
             HttpServletRequest request,
+            @RequestParam(value = "userId", required = true) String userId,
+            @RequestParam(value = "roomId", required = true) String roomId,
             Model model
     ) {
-        DBObject user = (DBObject) request.getSession().getAttribute("user");
-        String userId = user.get("_id").toString();
-        String roomId = (String) request.getSession().getAttribute("roomId");
         model.addAttribute("userId", userId);
         model.addAttribute("roomId", roomId);
         return "playIndex";

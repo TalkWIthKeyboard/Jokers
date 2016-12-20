@@ -237,7 +237,7 @@ public class PlayWebSocket {
     public void messageToNext(String roomId) throws IOException {
         RoomDBService roomdb = new RoomDBService();
         DBObject room = roomdb.findById(roomId);
-        Integer playIndex = ((Integer) room.get("playIndex") + 1) % 3;
+        Integer playIndex = ((Integer) room.get("playIndex") + 1) % 2;
         String playUserId = (String) ((List) room.get("userList")).get(playIndex);
         for (PlayWebSocket item : webSocketSet) {
             if (playUserId.equals(item.userId)) {
@@ -339,6 +339,7 @@ public class PlayWebSocket {
         if (robScore == 3 || (Integer) roomObj.get("rodNumber") == 3) {
             // 修改房间状态
             roomObj.put("state", 3);
+            Integer a = ((List) roomObj.get("userList")).indexOf(this.userId);
             roomObj.put("playIndex", ((List) roomObj.get("userList")).indexOf(this.userId));
             roomdb.updateInfo(roomId, roomObj);
 
