@@ -157,7 +157,6 @@ public class UserController {
         if (user != null) {
             user.put("username", changeUserForm.getUsername());
             user.put("image", changeUserForm.getImage());
-            user.put("score", changeUserForm.getScore());
             user.put("sex", changeUserForm.getSex());
             String error = userdb.updateInfo(userId, user);
             if (error == null) {
