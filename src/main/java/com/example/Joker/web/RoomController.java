@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by CoderSong on 16/11/24.
@@ -245,7 +246,23 @@ public class RoomController {
     @RequestMapping(value = "/all", method = RequestMethod.GET)
     public ErrorHandler getAllRooms() {
         List<DBObject> rooms = roomdb.findAll();
+        List<String> imgList = new ArrayList<>();
+
         if (rooms != null) {
+            // 用户的图片加到返回的数据里
+            for (int index = 0; index < rooms.size(); index++) {
+                DBObject roomObj = (DBObject) rooms.get(index);
+                List userList = (List) roomObj.get("userList");
+                for (int userIndex = 0; userIndex < userList.size(); userIndex++) {
+                    DBObject userObj = userdb.findById((String) userList.get(userIndex));
+                    if (userObj != null) {
+                        imgList.add(userObj.get("image").toString());
+                    }
+                }
+                roomObj.put("imgList",imgList);
+            }
+
+            // 构造数据
             ErrorHandler success = config.getHandler("SUCCESS");
             success.setParams(rooms);
             return success;

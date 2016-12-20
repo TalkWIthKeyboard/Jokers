@@ -93,7 +93,7 @@ public class PlayWebSocket {
             userReadyOrNot(this.roomId, 1);
             sendAllUserMessage("success ready", "userReady ", null);
             // 如果3个人都准备了就发牌开始
-            if (readyNumber(this.roomId) == 1) {
+            if (readyNumber(this.roomId) == 2) {
                 afterAllReady(this.roomId);
             }
         } else if (message.equals("userClearReady")) {
@@ -236,48 +236,59 @@ public class PlayWebSocket {
     public void playPoker(String message, String userId, String roomId) throws IOException {
         // 对前端的出牌请求进行转换
         String pokers = message.split(" ")[1];
-        String[] pokerList = pokers.split(",");
-        List<Poker> pokerObjList = new ArrayList<>();
-        Config config = new Config();
-        for (int i = 0; i < pokerList.length; i++) {
-            String[] poker = pokerList[i].split("/");
-            Poker pokerObj = new Poker(
-                    config.getRePointHandler().get(poker[1]),
-                    config.getReColorHandler().get(poker[0])
-            );
-            pokerObjList.add(pokerObj);
-        }
-
-        // 后端同步出牌操作
-        for (int i = 0; i < pokerObjList.size(); i++) {
-            for (int j = 0; j < this.userPokers.size(); j++) {
-                if (pokerObjList.get(i).getColor() == this.userPokers.get(j).getColor() &&
-                        pokerObjList.get(i).getPoint() == this.userPokers.get(j).getPoint()) {
-                    this.userPokers.remove(j);
-                    break;
-                }
-            }
-        }
-
-        // 出的是炸弹，处理一下分数
-        if (isBoom(pokerObjList)) {
-            RoomDBService roomdb = new RoomDBService();
-            DBObject roomObj = roomdb.findById(roomId);
-            roomObj.put("landlordScore", (Integer) roomObj.get("landlordScore") * 2);
-            roomdb.updateInfo(roomId, roomObj);
-        }
-
-        if (this.userPokers.size() > 0) {
+        // 没有出牌
+        if (pokers.equals("null")) {
             // 给前端发消息
             this.sendMessage("handPoker " + printPokers(this.userPokers));
             for (PlayWebSocket item : webSocketSet) {
                 if (roomId.equals(item.roomId)) {
-                    item.sendMessage("playerSendPoker " + userId + "," + printPokers(pokerObjList));
+                    item.sendMessage("playerSendPoker " + userId + "," + "null");
                 }
             }
         } else {
-            // 牌出完了,游戏结束
-            finishGame(roomId, userId);
+            String[] pokerList = pokers.split(",");
+            List<Poker> pokerObjList = new ArrayList<>();
+            Config config = new Config();
+            for (int i = 0; i < pokerList.length; i++) {
+                String[] poker = pokerList[i].split("/");
+                Poker pokerObj = new Poker(
+                        config.getRePointHandler().get(poker[1]),
+                        config.getReColorHandler().get(poker[0])
+                );
+                pokerObjList.add(pokerObj);
+            }
+
+            // 后端同步出牌操作
+            for (int i = 0; i < pokerObjList.size(); i++) {
+                for (int j = 0; j < this.userPokers.size(); j++) {
+                    if (pokerObjList.get(i).getColor() == this.userPokers.get(j).getColor() &&
+                            pokerObjList.get(i).getPoint() == this.userPokers.get(j).getPoint()) {
+                        this.userPokers.remove(j);
+                        break;
+                    }
+                }
+            }
+
+            // 出的是炸弹，处理一下分数
+            if (isBoom(pokerObjList)) {
+                RoomDBService roomdb = new RoomDBService();
+                DBObject roomObj = roomdb.findById(roomId);
+                roomObj.put("landlordScore", (Integer) roomObj.get("landlordScore") * 2);
+                roomdb.updateInfo(roomId, roomObj);
+            }
+
+            if (this.userPokers.size() > 0) {
+                // 给前端发消息
+                this.sendMessage("handPoker " + printPokers(this.userPokers));
+                for (PlayWebSocket item : webSocketSet) {
+                    if (roomId.equals(item.roomId)) {
+                        item.sendMessage("playerSendPoker " + userId + "," + printPokers(pokerObjList));
+                    }
+                }
+            } else {
+                // 牌出完了,游戏结束
+                finishGame(roomId, userId);
+            }
         }
     }
 

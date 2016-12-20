@@ -92,6 +92,7 @@ public class UserController {
         user.put("password", password);
         user.put("username", UserForm.getUsername());
         user.put("sex", UserForm.getSex());
+        user.put("image", UserForm.getImage());
         user.put("roomId", null);
         user.put("score",10);
         String error = userdb.saveData(user);
