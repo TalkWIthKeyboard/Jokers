@@ -6,6 +6,7 @@ import com.example.Joker.domain.UserDBService;
 import com.example.Joker.service.PockerComparator;
 import com.example.Joker.service.Poker;
 import com.example.Joker.service.Sands;
+import com.mongodb.DB;
 import com.mongodb.DBObject;
 import org.springframework.stereotype.Component;
 
@@ -260,11 +261,13 @@ public class PlayWebSocket {
         DBObject room = roomdb.findById(roomId);
         List userList = (List) room.get("userList");
 
+        UserDBService userdb = new UserDBService();
         // 构造消息
         for (int index = 0; index < userList.size(); index++) {
             for (PlayWebSocket item : webSocketSet) {
                 if (item.userId.equals(userList.get(index))) {
-                    message += item.userId + "/" + item.userPokers.size() + ",";
+                    DBObject user = userdb.findById((String) userList.get(index));
+                    message += user.get("userName") + "/" + item.userPokers.size() + ",";
                 }
             }
         }
