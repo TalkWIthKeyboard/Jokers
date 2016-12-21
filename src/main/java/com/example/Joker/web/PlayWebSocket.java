@@ -39,8 +39,6 @@ public class PlayWebSocket {
 
     private List<Poker> userPokers;
     private List<Poker> lastCard;
-    private UserDBService userdb = new UserDBService();
-    private RoomDBService roomdb = new RoomDBService();
 
     /**
      * WebSocket的建立连接
@@ -95,7 +93,7 @@ public class PlayWebSocket {
             userReadyOrNot(this.roomId, 1);
             sendAllUserMessage("success ready", "userReady ", "");
             // 如果3个人都准备了就发牌开始
-            if (readyNumber(this.roomId) == 3) {
+            if (readyNumber(this.roomId) == 2) {
                 afterAllReady(this.roomId);
             }
         } else if (message.equals("userClearReady")) {
@@ -179,6 +177,7 @@ public class PlayWebSocket {
      */
     public void afterAllReady(String roomId) throws IOException {
         // 修改房间状态
+        RoomDBService roomdb = new RoomDBService();
         DBObject room = roomdb.findById(roomId);
         room.put("state", 2);
         roomdb.updateInfo(roomId, room);
@@ -191,12 +190,14 @@ public class PlayWebSocket {
 
         // 领牌
         for (PlayWebSocket item : webSocketSet) {
-            String itemUserId = item.userId;
-            String itemRoomId = item.roomId;
-            item.userPokers = players.get(sendPoker(itemUserId, itemRoomId));
-            item.lastCard = players.get(3);
-            item.sendMessage("handPoker " + printPokers(item.userPokers));
-            item.sendMessage("lastCards " + printPokers(item.lastCard));
+            if (item.roomId.equals(roomId)) {
+                String itemUserId = item.userId;
+                String itemRoomId = item.roomId;
+                item.userPokers = players.get(sendPoker(itemUserId, itemRoomId));
+                item.lastCard = players.get(3);
+                item.sendMessage("handPoker " + printPokers(item.userPokers));
+                item.sendMessage("lastCards " + printPokers(item.lastCard));
+            }
         }
     }
 
@@ -236,6 +237,7 @@ public class PlayWebSocket {
      * @throws IOException
      */
     public void messageToNext(String roomId) throws IOException {
+        RoomDBService roomdb = new RoomDBService();
         DBObject room = roomdb.findById(roomId);
         Integer playIndex = ((Integer) room.get("playIndex") + 1) % 3;
         String playUserId = (String) ((List) room.get("userList")).get(playIndex);
@@ -255,6 +257,7 @@ public class PlayWebSocket {
      * @throws IOException
      */
     public void allUserPokerNum(String roomId) throws IOException {
+        RoomDBService roomdb = new RoomDBService();
         String message = new String("playerPokerNum ");
         DBObject room = roomdb.findById(roomId);
         List userList = (List) room.get("userList");
@@ -322,6 +325,7 @@ public class PlayWebSocket {
 
             // 出的是炸弹，处理一下分数
             if (isBoom(pokerObjList)) {
+                RoomDBService roomdb = new RoomDBService();
                 DBObject roomObj = roomdb.findById(roomId);
                 roomObj.put("landlordScore", (Integer) roomObj.get("landlordScore") * 2);
                 roomdb.updateInfo(roomId, roomObj);
@@ -355,6 +359,7 @@ public class PlayWebSocket {
         // 对前端的抢地主请求进行转换
         Integer robScore = Integer.parseInt(message.split(" ")[1]);
 
+        RoomDBService roomdb = new RoomDBService();
         DBObject roomObj = roomdb.findById(roomId);
         if (robScore > (Integer) roomObj.get("landlordScore")) {
             roomObj.put("landlordUserId", userId);
@@ -404,6 +409,7 @@ public class PlayWebSocket {
 
     public void finishGame(String roomId, String userId) throws IOException {
         // 修改房间状态
+        RoomDBService roomdb = new RoomDBService();
         DBObject room = roomdb.findById(roomId);
         room.put("state", 4);
         roomdb.updateInfo(roomId, room);
@@ -421,6 +427,7 @@ public class PlayWebSocket {
                 thisScore *= 2;
             }
 
+            UserDBService userdb = new UserDBService();
             DBObject user = userdb.findById(userList.get(i));
             // 这个人是赢家
             if (userList.get(i).equals(userId)) {

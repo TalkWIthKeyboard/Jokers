@@ -30,8 +30,6 @@ public class RoomWebSocket {
 
     private Session session;
     private String userId;
-    private UserDBService userdb = new UserDBService();
-
 
     /**
      * WebSocket的建立连接
@@ -127,6 +125,7 @@ public class RoomWebSocket {
             if (item.userId.equals(userId)) {
                 item.sendMessage("success create room");
             } else {
+                UserDBService userdb = new UserDBService();
                 DBObject user = userdb.findById(userId);
                 item.sendMessage("createRoom " + userId + "," + roomId + "," + user.get("image"));
             }
@@ -148,6 +147,7 @@ public class RoomWebSocket {
             if (item.userId.equals(userId)) {
                 item.sendMessage("success enter room");
             } else {
+                UserDBService userdb = new UserDBService();
                 DBObject user = userdb.findById(userId);
                 item.sendMessage("enterRoom " + userId + "," + roomId + "," + user.get("image"));
             }
