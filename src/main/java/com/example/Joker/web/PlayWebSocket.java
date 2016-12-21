@@ -6,7 +6,6 @@ import com.example.Joker.domain.UserDBService;
 import com.example.Joker.service.PockerComparator;
 import com.example.Joker.service.Poker;
 import com.example.Joker.service.Sands;
-import com.mongodb.DB;
 import com.mongodb.DBObject;
 import org.springframework.stereotype.Component;
 
@@ -40,6 +39,8 @@ public class PlayWebSocket {
 
     private List<Poker> userPokers;
     private List<Poker> lastCard;
+    private UserDBService userdb = new UserDBService();
+    private RoomDBService roomdb = new RoomDBService();
 
     /**
      * WebSocket的建立连接
@@ -178,7 +179,6 @@ public class PlayWebSocket {
      */
     public void afterAllReady(String roomId) throws IOException {
         // 修改房间状态
-        RoomDBService roomdb = new RoomDBService();
         DBObject room = roomdb.findById(roomId);
         room.put("state", 2);
         roomdb.updateInfo(roomId, room);
@@ -236,7 +236,6 @@ public class PlayWebSocket {
      * @throws IOException
      */
     public void messageToNext(String roomId) throws IOException {
-        RoomDBService roomdb = new RoomDBService();
         DBObject room = roomdb.findById(roomId);
         Integer playIndex = ((Integer) room.get("playIndex") + 1) % 3;
         String playUserId = (String) ((List) room.get("userList")).get(playIndex);
@@ -257,7 +256,6 @@ public class PlayWebSocket {
      */
     public void allUserPokerNum(String roomId) throws IOException {
         String message = new String("playerPokerNum ");
-        RoomDBService roomdb = new RoomDBService();
         DBObject room = roomdb.findById(roomId);
         List userList = (List) room.get("userList");
 
@@ -324,7 +322,6 @@ public class PlayWebSocket {
 
             // 出的是炸弹，处理一下分数
             if (isBoom(pokerObjList)) {
-                RoomDBService roomdb = new RoomDBService();
                 DBObject roomObj = roomdb.findById(roomId);
                 roomObj.put("landlordScore", (Integer) roomObj.get("landlordScore") * 2);
                 roomdb.updateInfo(roomId, roomObj);
@@ -358,7 +355,6 @@ public class PlayWebSocket {
         // 对前端的抢地主请求进行转换
         Integer robScore = Integer.parseInt(message.split(" ")[1]);
 
-        RoomDBService roomdb = new RoomDBService();
         DBObject roomObj = roomdb.findById(roomId);
         if (robScore > (Integer) roomObj.get("landlordScore")) {
             roomObj.put("landlordUserId", userId);
@@ -408,12 +404,9 @@ public class PlayWebSocket {
 
     public void finishGame(String roomId, String userId) throws IOException {
         // 修改房间状态
-        RoomDBService roomdb = new RoomDBService();
         DBObject room = roomdb.findById(roomId);
         room.put("state", 4);
         roomdb.updateInfo(roomId, room);
-
-        UserDBService userdb = new UserDBService();
 
         // 构造通知信息，同步玩家数据库分数
         List<String> userList = (List<String>) room.get("userList");
