@@ -109,14 +109,11 @@ public class UserController {
      * 用户登录
      *
      * @param login
-     * @param request
      * @return
      */
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public ErrorHandler login(
-            @RequestBody LoginForm login,
-            HttpServletRequest request,
-            HttpServletResponse response
+            @RequestBody LoginForm login
     ) {
         DBObject user = userdb.findByAccount(login.account);
         if (user != null) {

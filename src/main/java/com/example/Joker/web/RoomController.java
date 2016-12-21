@@ -38,8 +38,7 @@ public class RoomController {
     @RequestMapping(value = "/", method = RequestMethod.POST)
     public ErrorHandler createRoom(
             @RequestBody CreateRoomForm roomForm,
-            @RequestParam(value = "userId", required = true) String userId,
-            HttpServletRequest request
+            @RequestParam(value = "userId", required = true) String userId
     ) {
         DBObject room = new BasicDBObject();
         if (!roomForm.key.equals("")) {
@@ -63,8 +62,6 @@ public class RoomController {
         if (roomId.equals("error")) {
             return config.getHandler("DB_SAVE_ERROR");
         } else {
-            // 同步session信息
-            request.getSession().setAttribute("roomId", roomId);
             // 同步修改用户的房间信息
             user.put("roomId", roomId);
             String error = userdb.updateInfo(userId, user);
@@ -83,15 +80,13 @@ public class RoomController {
      * 加入房间
      *
      * @param id
-     * @param request
      * @return
      */
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public ErrorHandler joinRoom(
             @RequestParam(value = "userId", required = true) String userId,
             @RequestParam(value = "roomId", required = true) String id,
-            @RequestParam(value = "key", required = true) String key,
-            HttpServletRequest request
+            @RequestParam(value = "key", required = true) String key
     ) {
         DBObject roomObj = roomdb.findById(id);
         // 密码编码
@@ -112,8 +107,6 @@ public class RoomController {
                     roomObj.put("userList", userList);
                     String error = roomdb.updateInfo(id, roomObj);
                     if (error == null) {
-                        // 同步session信息
-                        request.getSession().setAttribute("roomId", id);
                         // 同步用户的房间信息
                         user.put("roomId", id);
                         String err = userdb.updateInfo(userId, user);
@@ -177,14 +170,12 @@ public class RoomController {
      * 用户退出房间
      *
      * @param id
-     * @param request
      * @return
      */
     @RequestMapping(value = "/userRoom", method = RequestMethod.GET)
     public ErrorHandler exitRoom(
             @RequestParam(value = "userId", required = true) String userId,
-            @RequestParam(value = "roomId", required = true) String id,
-            HttpServletRequest request
+            @RequestParam(value = "roomId", required = true) String id
     ) {
         DBObject roomObj = roomdb.findById(id);
         if (roomObj != null) {
@@ -201,8 +192,6 @@ public class RoomController {
             if (flag == -1) {
                 return config.getHandler("USER_ROOM_ERROR");
             } else {
-                // 先同步用户房间信息和session信息
-                request.getSession().setAttribute("roomId", null);
                 user.put("roomId", null);
                 String err = userdb.updateInfo(id, user);
                 if (err == null) {
@@ -230,6 +219,27 @@ public class RoomController {
             }
         } else {
             return config.getHandler("ROOM_ERROR");
+        }
+    }
+
+
+    /**
+     * 获得一个房间内所有的用户信息
+     *
+     * @return
+     */
+    @RequestMapping(value = "/room/userInfo", method = RequestMethod.GET)
+    public ErrorHandler getRoomUserInfo(
+            @RequestParam(value = "roomId", required = true) String id
+    ) {
+        List<DBObject> userInfoList = userdb.getRoomUserInfo(id);
+
+        if (userInfoList != null) {
+            ErrorHandler success = config.getHandler("SUCCESS");
+            success.setParams(userInfoList);
+            return success;
+        } else {
+            return config.getHandler("INSIDE_ERROR");
         }
     }
 

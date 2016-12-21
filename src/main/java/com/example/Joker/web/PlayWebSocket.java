@@ -261,13 +261,11 @@ public class PlayWebSocket {
         DBObject room = roomdb.findById(roomId);
         List userList = (List) room.get("userList");
 
-        UserDBService userdb = new UserDBService();
         // 构造消息
         for (int index = 0; index < userList.size(); index++) {
             for (PlayWebSocket item : webSocketSet) {
                 if (item.userId.equals(userList.get(index))) {
-                    DBObject user = userdb.findById((String) userList.get(index));
-                    message += user.get("userName") + "/" + item.userPokers.size() + ",";
+                    message += item.userId + "/" + item.userPokers.size() + ",";
                 }
             }
         }

@@ -112,6 +112,27 @@ public class UserDBService {
         }
     }
 
+
+    /**
+     * 返回一个房间内的所有用户信息
+     *
+     * @return
+     */
+    public List<DBObject> getRoomUserInfo(String roomId) {
+        try {
+            BasicDBObject basicObj = new BasicDBObject("roomId", roomId);
+            List<DBObject> answer = this.user.find(basicObj).toArray();
+            if (answer.size() > 0) {
+                return answer;
+            } else {
+                return null;
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
     /**
      * 保存数据
      *
