@@ -43,6 +43,7 @@ public class Config {
                 authorityError = new ErrorHandler(415, "AUTHORITY_ERROR", "没有房主权限"),
                 userNumError = new ErrorHandler(416, "USER_NUM_ERROR", "房间已经满员"),
                 userRoomError = new ErrorHandler(417, "USER_ROOM_ERROR", "该用户不在这个房间"),
+                userScoreError = new ErrorHandler(417, "USER_SCORE_ERROR", "该用户积分超过了10分"),
                 insideError = new ErrorHandler(500, "INSIDE_ERROR", "方法内部错误"),
                 dbSaveError = new ErrorHandler(420, "DB_SAVE_ERROR", "数据库的存储错误"),
                 dbUpdateError = new ErrorHandler(421, "DB_UPDATE_ERROR", "数据库的更新错误"),
@@ -58,6 +59,7 @@ public class Config {
         list.add(authorityError);
         list.add(userNumError);
         list.add(userRoomError);
+        list.add(userScoreError);
         list.add(dbSaveError);
         list.add(dbUpdateError);
         list.add(dbRemoveError);

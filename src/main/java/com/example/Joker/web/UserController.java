@@ -1,6 +1,8 @@
 package com.example.Joker.web;
 
 import com.example.Joker.Config;
+import com.example.Joker.domain.ReceiveScore;
+import com.example.Joker.domain.ReceiveScoreDBService;
 import com.example.Joker.domain.User;
 import com.example.Joker.service.form.ChangePwdForm;
 import com.example.Joker.service.tool.ErrorHandler;
@@ -24,6 +26,7 @@ public class UserController {
     Tool tool = new Tool();
     Config config = new Config();
     UserDBService userdb = new UserDBService();
+    ReceiveScoreDBService receiveScoreDB = new ReceiveScoreDBService();
 
     /**
      * 获取用户的基本信息
@@ -181,6 +184,67 @@ public class UserController {
             return success;
         } else {
             return config.getHandler("INSIDE_ERROR");
+        }
+    }
+
+
+    /**
+     * 查询用户今天的领取积分情况
+     *
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "/score/receive", method = RequestMethod.GET)
+    public ErrorHandler canReceiveScore(
+            @RequestParam(value = "userId", required = true) String id
+    ){
+        Integer count = receiveScoreDB.findByDateAndUserId(id);
+        DBObject user = userdb.findById(id);
+
+        if ((Integer) user.get("score") > 10) {
+            return config.getHandler("USER_SCORE_ERROR");
+        } else {
+            if (count == -1) {
+                return config.getHandler("INSIDE_ERROR");
+            } else {
+                ErrorHandler success = config.getHandler("SUCCESS");
+                success.setParams(count.toString());
+                return success;
+            }
+        }
+    }
+
+
+    /**
+     * 给用户领取积分
+     *
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "/score/add", method = RequestMethod.GET)
+    public ErrorHandler receiveScore(
+            @RequestParam(value = "userId", required = true) String id
+    ){
+        DBObject user = userdb.findById(id);
+        if (user != null) {
+            // 修改用户积分
+            user.put("score", (Integer) user.get("score") + 50);
+            String error = userdb.updateInfo(id, user);
+            if (error == null) {
+                // 添加本条记录
+                DBObject receiveScore = new BasicDBObject();
+                receiveScore.put("userId", id);
+                String receiveScoreDBerror = receiveScoreDB.saveData(receiveScore);
+                if (receiveScoreDBerror == null) {
+                    return config.getHandler("SUCCESS");
+                } else {
+                    return config.getHandler("DB_SAVE_ERROR");
+                }
+            } else {
+                return config.getHandler("DB_UPDATE_ERROR");
+            }
+        } else {
+            return config.getHandler("USER_ERROR");
         }
     }
 }
