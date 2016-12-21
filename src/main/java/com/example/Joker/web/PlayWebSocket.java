@@ -93,7 +93,7 @@ public class PlayWebSocket {
             userReadyOrNot(this.roomId, 1);
             sendAllUserMessage("success ready", "userReady ", "");
             // 如果3个人都准备了就发牌开始
-            if (readyNumber(this.roomId) == 2) {
+            if (readyNumber(this.roomId) == 3) {
                 afterAllReady(this.roomId);
             }
         } else if (message.equals("userClearReady")) {
