@@ -1,5 +1,7 @@
 package com.example.Joker.web;
 
+import com.example.Joker.domain.UserDBService;
+import com.mongodb.DBObject;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.OnClose;
@@ -122,7 +124,7 @@ public class RoomWebSocket {
             if (item.userId.equals(userId)) {
                 item.sendMessage("success create room");
             } else {
-                item.sendMessage("createRoom " + roomId);
+                item.sendMessage("createRoom " + userId + "," + roomId);
             }
         }
     }
@@ -141,7 +143,9 @@ public class RoomWebSocket {
             if (item.userId.equals(userId)) {
                 item.sendMessage("success enter room");
             } else {
-                item.sendMessage("enterRoom " + userId + "," + roomId);
+                UserDBService userdb = new UserDBService();
+                DBObject user = userdb.findById(userId);
+                item.sendMessage("enterRoom " + userId + "," + roomId + "," + user.get("image"));
             }
         }
     }

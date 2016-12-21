@@ -235,6 +235,9 @@ public class RoomController {
         List<DBObject> userInfoList = userdb.getRoomUserInfo(id);
 
         if (userInfoList != null) {
+            for (int index = 0; index < userInfoList.size(); index++) {
+                userInfoList.get(index).put("_id",userInfoList.get(index).get("_id").toString());
+            }
             ErrorHandler success = config.getHandler("SUCCESS");
             success.setParams(userInfoList);
             return success;
