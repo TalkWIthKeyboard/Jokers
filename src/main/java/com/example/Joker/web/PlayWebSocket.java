@@ -429,12 +429,13 @@ public class PlayWebSocket {
         UserDBService userdb = new UserDBService();
         for (int i = 0; i < userList.size(); i++) {
             // 这个人是地主
-            DBObject user = userdb.findById(userId);
+            DBObject user = userdb.findById(userList.get(i));
             if (userList.get(i).equals(landlordUserId)) {
                 user.put("score", (Integer) user.get("score") + loadNumber * score * 2);
             } else {
                 user.put("score", (Integer) user.get("score") + loadNumber * score * -1);
             }
+            userdb.updateInfo(userList.get(i), user);
         }
 
         // 通知房间内的所有用户
