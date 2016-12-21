@@ -124,7 +124,9 @@ public class RoomWebSocket {
             if (item.userId.equals(userId)) {
                 item.sendMessage("success create room");
             } else {
-                item.sendMessage("createRoom " + userId + "," + roomId);
+                UserDBService userdb = new UserDBService();
+                DBObject user = userdb.findById(userId);
+                item.sendMessage("createRoom " + userId + "," + roomId + "," + user.get("image"));
             }
         }
     }
