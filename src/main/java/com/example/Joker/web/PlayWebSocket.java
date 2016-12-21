@@ -386,7 +386,7 @@ public class PlayWebSocket {
         // 构造通知信息，同步玩家数据库分数
         List<String> userList = (List<String>) room.get("userList");
         String message = new String();
-        Integer score = (Integer) room.get("rodNumber");
+        Integer score = (Integer) room.get("landlordScore");
         String landlordUserId = (String) room.get("landlordUserId");
 
         for (int i = 0; i < userList.size(); i++) {
@@ -406,7 +406,7 @@ public class PlayWebSocket {
             } else {
                 // 这个人是输家
                 DBObject userObj = userdb.findById(userList.get(i));
-                message += userObj.get("userName") + " lose " + thisScore.toString() + "score,";
+                message += userObj.get("userName") + " lose " + thisScore.toString() + " score,";
                 user.put("score", (Integer) user.get("score") - thisScore);
                 userdb.updateInfo(userList.get(i), user);
             }
