@@ -248,6 +248,35 @@ public class PlayWebSocket {
         roomdb.updateInfo(roomId, room);
     }
 
+    /**
+     * 统计这个房间内其他人的手牌数
+     *
+     * @param roomId
+     * @throws IOException
+     */
+    public void allUserPokerNum(String roomId) throws IOException {
+        String message = new String("playerPokerNum ");
+        RoomDBService roomdb = new RoomDBService();
+        DBObject room = roomdb.findById(roomId);
+        List userList = (List) room.get("userList");
+
+        // 构造消息
+        for (int index = 0; index < userList.size(); index++) {
+            for (PlayWebSocket item : webSocketSet) {
+                if (item.userId.equals(userList.get(index))) {
+                    message += item.userId + "/" + item.userPokers.size() + ",";
+                }
+            }
+        }
+
+        // 发送消息
+        for (PlayWebSocket item : webSocketSet) {
+            if (roomId.equals(item.roomId)) {
+                item.sendMessage(message);
+            }
+        }
+    }
+
 
     /**
      * 处理客户端的出牌消息
@@ -261,6 +290,7 @@ public class PlayWebSocket {
         if (pokers.equals("null")) {
             // 给前端发消息
             messageToNext(roomId);
+            allUserPokerNum(roomId);
             this.sendMessage("handPoker " + printPokers(this.userPokers));
             for (PlayWebSocket item : webSocketSet) {
                 if (roomId.equals(item.roomId)) {
@@ -300,8 +330,9 @@ public class PlayWebSocket {
             }
 
             if (this.userPokers.size() > 0) {
-                // 给前端发消息
+                // 给前端发出牌消息
                 messageToNext(roomId);
+                allUserPokerNum(roomId);
                 this.sendMessage("handPoker " + printPokers(this.userPokers));
                 for (PlayWebSocket item : webSocketSet) {
                     if (roomId.equals(item.roomId)) {
