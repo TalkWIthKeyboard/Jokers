@@ -119,7 +119,7 @@ public class RoomWebSocket {
      * @throws IOException
      */
     public void afterCreateRoom(String message, String userId) throws IOException {
-        String roomId = message.split("")[1];
+        String roomId = message.split(" ")[1];
         for (RoomWebSocket item : webSocketSet) {
             if (item.userId.equals(userId)) {
                 item.sendMessage("success create room");

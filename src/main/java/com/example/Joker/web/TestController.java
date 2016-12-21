@@ -40,18 +40,16 @@ public class TestController {
     /**
      * 房间页面websocket测试
      *
-     * @param request
+
      * @param model
      * @return
      */
     @RequestMapping(value = "/roomTest", method = RequestMethod.GET)
     public String roomTest(
+            @RequestParam(value = "userId", required = true) String userId,
             @RequestParam(value = "roomId", required = true) String roomId,
-            HttpServletRequest request,
             Model model
     ) {
-        DBObject user = (DBObject) request.getSession().getAttribute("user");
-        String userId = user.get("_id").toString();
         model.addAttribute("userId", userId);
         model.addAttribute("roomId", roomId);
         return "roomIndex";
