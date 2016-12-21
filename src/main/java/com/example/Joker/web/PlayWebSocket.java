@@ -419,28 +419,21 @@ public class PlayWebSocket {
         String message = new String();
         Integer score = (Integer) room.get("landlordScore");
         String landlordUserId = (String) room.get("landlordUserId");
+        Integer loadNumber = 1;
 
+        // 先判断是地主胜利还是平民
+        if (!landlordUserId.equals(userId)) {
+            loadNumber = -1;
+        }
+
+        UserDBService userdb = new UserDBService();
         for (int i = 0; i < userList.size(); i++) {
-            Integer thisScore = score;
             // 这个人是地主
+            DBObject user = userdb.findById(userId);
             if (userList.get(i).equals(landlordUserId)) {
-                thisScore *= 2;
-            }
-
-            UserDBService userdb = new UserDBService();
-            DBObject user = userdb.findById(userList.get(i));
-            // 这个人是赢家
-            if (userList.get(i).equals(userId)) {
-                DBObject userObj = userdb.findById(userId);
-                message += userObj.get("userName") + " win " + thisScore.toString() + " score,";
-                user.put("score", (Integer) user.get("score") + thisScore);
-                userdb.updateInfo(userList.get(i), user);
+                user.put("score", (Integer) user.get("score") + loadNumber * score * 2);
             } else {
-                // 这个人是输家
-                DBObject userObj = userdb.findById(userList.get(i));
-                message += userObj.get("userName") + " lose " + thisScore.toString() + " score,";
-                user.put("score", (Integer) user.get("score") - thisScore);
-                userdb.updateInfo(userList.get(i), user);
+                user.put("score", (Integer) user.get("score") + loadNumber * score * -1);
             }
         }
 
